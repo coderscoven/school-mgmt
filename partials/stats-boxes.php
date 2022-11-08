@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-lg-4 col-md-6 col-12">
         <!-- small box -->
-        <div class="small-box bg-primary">
+        <div class="small-box bg-info">
             <div class="inner">
                 <h3><?php echo $crud->statsBoxes()['numStudent']; ?></h3>
 

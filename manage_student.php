@@ -41,7 +41,7 @@ $classes = $crud->getClasses();
                 <input type="text" class="form-control" name="id_no" value="<?php echo $crud->generateStudentIds(); ?>" readonly>
             </div>
             <div class="form-group col-md-6">
-                <label for="stud_house" class="control-label">Class/Stream</label>
+                <label for="stud_house" class="control-label">House</label>
                 <select class="form-control" id="stud_house" name="stud_house" required>
                     <?php foreach ($houses as $key => $v) { ?>
                         <option value="<?php echo $v['id']; ?>" <?php echo isset($house_id) && $house_id == $v['id'] ? 'selected' : '' ?>><?php echo $v['house_name']; ?></option>

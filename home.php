@@ -51,7 +51,7 @@
     <?php include "partials/stats-boxes.php"; ?>
 
 
-    <?php include "partials/create-requirements.php"; ?>
+    <?php include "partials/mgm-requirement-fees.php"; ?>
 
     <div class="row mb-4">
         <div class="col-lg-6">

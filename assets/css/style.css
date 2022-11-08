@@ -1682,12 +1682,14 @@ a.nav-item {
   background-color: #ffffffc4;
   color: #484343;
   font-weight: 600;
+  transition: all ease-in 0.1s;
 }
 
 a.nav-item:hover,
 .nav-item.active {
-  background-color: #000000ad;
+  background-color: #007bff;
   color: #fffafa;
+  /*#000000ad*/
 }
 
 main#view-panel {

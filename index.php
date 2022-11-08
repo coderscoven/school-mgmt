@@ -109,6 +109,10 @@
                 $pagetitle = '<h1><i class="fas fa-graduation-cap" role="img" aria-label="Students"></i> STUDENTS</h1>';
                 $pageText = "Students";
                 break;
+              case "requirements":
+                $pagetitle = '<h1><i class="fas fas fa-tools" role="img" aria-label="Requirements"></i> STUDENT REQUIREMENTS</h1>';
+                $pageText = "Requirements";
+                break;
               case "parents":
                 $pagetitle = '<h1><i class="fas fa-user-gear" role="img" aria-label="Parents"></i> PARENTS</h1>';
                 $pageText = "Parents";

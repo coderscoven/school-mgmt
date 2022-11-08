@@ -36,30 +36,33 @@
 				<div class="card-header">
 					<div class="row align-items-center">
 						<div class="col-10">
-							<strong>List of Classes and Fees</strong>
+							<strong>List of Classes</strong>
 						</div>
 						<div class="col-2">
-							<a class="btn btn-primary btn-block btn-sm" href="javascript:void(0)" id="new_course">
-								<i class="fas fa-plus"></i> New Entry
-							</a>
+							<button type="button" class="btn btn-primary btn-block btn-sm" href="javascript:void(0)" id="new_class">
+								<i class="fas fa-plus"></i> New Class
+							</button>
 						</div>
 					</div>
 				</div>
 				<div class="card-body">
-					<table class="table table-sm datatableClass table-bordered table-hover">
-						<thead>
-							<tr>
-								<th class="text-center">#</th>
-								<th class="">Class/Level</th>
-								<th class="">Description</th>
-								<th class="">Total Fee</th>
-								<th class="text-center">Action</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php echo $crud->courses(); ?>
-						</tbody>
-					</table>
+					<div class="table-responsive">
+						<table class="table table-sm datatableClass table-striped table-hover">
+							<thead class="bg-secondary text-light">
+								<tr>
+									<th>#</th>
+									<th class="">Class</th>
+									<th class="">Teacher</th>
+									<th class="">Description</th>
+									<th class="text-right">Fee</th>
+									<th class="text-center">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php echo $crud->fetchClasses(); ?>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>

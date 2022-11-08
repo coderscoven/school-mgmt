@@ -48,16 +48,27 @@ if ($action == "save_settings") {
 	if ($save)
 		echo $save;
 }
-if ($action == "save_course") {
-	$save = $crud->save_course();
+
+// ------------------------------------
+//	classes
+// ------------------------------------
+
+if ($action == "save_class") {
+	$save = $crud->save_class();
 	if ($save)
 		echo $save;
 }
-if ($action == "delete_course") {
-	$delete = $crud->delete_course();
+if ($action == "delete_class") {
+	$delete = $crud->delete_class();
 	if ($delete)
 		echo $delete;
 }
+
+
+
+// ------------------------------------
+//	students
+// ------------------------------------
 if ($action == "save_student") {
 	$save = $crud->save_student();
 	if ($save)
@@ -68,6 +79,32 @@ if ($action == "delete_student") {
 	if ($delete)
 		echo $delete;
 }
+
+
+
+// ------------------------------------
+//	fees
+// ------------------------------------
+
+if ($action == "save_school_fees") {
+	$save = $crud->save_school_fees();
+	if ($save)
+		echo $save;
+}
+// fetch fees struture
+if ($action == "fetch_all_fees_structure") {
+	echo $crud->fetch_all_fees_structure();
+}
+
+// delete fee structure
+if ($action == "delete_fees_structure") {
+	$delete = $crud->delete_fees_structure();
+	if ($delete)
+		echo $delete;
+}
+
+// ----
+
 if ($action == "save_fees") {
 	$save = $crud->save_fees();
 	if ($save)

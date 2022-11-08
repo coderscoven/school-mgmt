@@ -17,43 +17,54 @@
 			Dashboard
 		</a>
 
-		<a href="index.php?page=fees" class="nav-item nav-fees"><span class='icon-field'><i class="fas fa-money-check "></i></span>
-			Student Fees
-		</a>
-
-		<a href="index.php?page=payments" class="nav-item nav-payments"><span class='icon-field'><i class="fas fa-receipt "></i></span>
-			Payments
-		</a>
-
-		<!-- <div class="mx-2 text-white">MASTER LIST</div> -->
 		<a href="index.php?page=classes" class="nav-item nav-classes"><span class='icon-field'><i class="fas fa-scroll "></i></span>
-			Classes &amp; Fees
+			Classes
 		</a>
 
 		<a href="index.php?page=teachers" class="nav-item nav-teachers"><span class='icon-field'><i class="fas fa-chalkboard-teacher "></i></span>
 			Teacher Mgmt
 		</a>
 
-		<div class="mx-2 text-white font-weight-bold">STUDENT</div>
-		<a href="index.php?page=students" class="nav-item nav-students"><span class='icon-field'><i class="fas fa-graduation-cap "></i></span>
-			Student Mgmt
-		</a>
-		<a href="index.php?page=parents" class="nav-item nav-parents"><span class='icon-field'><i class="fas fa-user-gear "></i></span>
-			Parent Mgmt
-		</a>
+		<!-- ============================================ -->
+		<!-- ============================================ -->
 
-		<div class="mx-2 text-white font-weight-bold">REPORTS</div>
-		<a href="index.php?page=payments_report" class="nav-item nav-payments_report"><span class='icon-field'><i class="fas fa-th-list "></i></span>
-			Payments
+		<div class="text-white font-weight-bold bg-black py-1 pl-4">STUDENT</div>
+
+		<a href="index.php?page=students" class="nav-item nav-students"><span class='icon-field'><i class="far fa-circle "></i></span>
+			Mgmt
 		</a>
-		<a href="index.php?page=requirements_report" class="nav-item nav-requirements_report"><span class='icon-field'><i class="fas fa-tools "></i></span>
+		<a href="index.php?page=requirements" class="nav-item nav-requirements"><span class='icon-field'><i class="far fa-circle "></i></span>
 			Requirements
 		</a>
-		<a href="index.php?page=students_report" class="nav-item nav-students_report"><span class='icon-field'><i class="fas fa-file "></i></span>
+		<a href="index.php?page=fees" class="nav-item nav-fees"><span class='icon-field'><i class="far fa-circle "></i></span>
+			Fees
+		</a>
+		<a href="index.php?page=payments" class="nav-item nav-payments"><span class='icon-field'><i class="far fa-circle "></i></span>
+			Payments
+		</a>
+		<a href="index.php?page=parents" class="nav-item nav-parents"><span class='icon-field'><i class="far fa-circle "></i></span>
+			Parents
+		</a>
+
+		<!-- ============================================ -->
+		<!-- ============================================ -->
+
+		<div class="text-white font-weight-bold bg-black py-1 pl-4">REPORTS</div>
+
+		<a href="index.php?page=payments_report" class="nav-item nav-payments_report"><span class='icon-field'><i class="far fa-circle "></i></span>
+			Payments
+		</a>
+		<a href="index.php?page=requirements_report" class="nav-item nav-requirements_report"><span class='icon-field'><i class="far fa-circle "></i></span>
+			Requirements
+		</a>
+		<a href="index.php?page=students_report" class="nav-item nav-students_report"><span class='icon-field'><i class="far fa-circle "></i></span>
 			Students
 		</a>
 
-		<div class="mx-2 text-white font-weight-bold">SYSTEMS</div>
+		<!-- ============================================ -->
+		<!-- ============================================ -->
+
+		<div class="text-white font-weight-bold bg-black py-1 pl-4">SYSTEMS</div>
 		<?php if ($_SESSION['login_type'] == 1) : ?>
 			<a href="index.php?page=users" class="nav-item nav-users"><span class='icon-field'><i class="fas fa-users "></i></span> Users</a>
 			<!-- <a href="index.php?page=site_settings" class="nav-item nav-site_settings"><span class='icon-field'><i class="fa fa-cogs"></i></span> System Settings</a> -->

@@ -34,3 +34,6 @@ define("TEACHERS_PHOTO_DIR", "assets/uploads/teachers/");
 //
 define("yes", "yes");
 define("no", "no");
+
+//
+define("na", "N/A");

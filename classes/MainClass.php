@@ -434,77 +434,48 @@ class MainClass extends DBConnect
 	}
 
 
-	/**
-	 * save course
-	 *
-	 * @return mixed
-	 */
-	function save_course()
-	{
-		extract($_POST);
-		$data = "";
-		foreach ($_POST as $k => $v) {
-			if (!in_array($k, array('id', 'fid', 'type', 'amount')) && !is_numeric($k)) {
-				if (empty($data)) {
-					$data .= " $k='$v' ";
-				} else {
-					$data .= ", $k='$v' ";
-				}
-			}
-		}
-		$check = $this->db->query("SELECT * FROM courses where course ='$course' and level ='$level' " . (!empty($id) ? " and id != {$id} " : ''))->num_rows;
-		if ($check > 0) {
-			return 2;
-			exit;
-		}
-		if (empty($id)) {
-			$save = $this->db->query("INSERT INTO courses set $data");
-			if ($save) {
-				$id = $this->db->insert_id;
-				foreach ($fid as $k => $v) {
-					$data = " course_id = '$id' ";
-					$data .= ", description = '{$type[$k]}' ";
-					$data .= ", amount = '{$amount[$k]}' ";
-					$save2[] = $this->db->query("INSERT INTO fees set $data");
-				}
-				if (isset($save2))
-					return 1;
-			}
-		} else {
-			$save = $this->db->query("UPDATE courses set $data where id = $id");
-			if ($save) {
-				$this->db->query("DELETE FROM fees where course_id = $id and id not in (" . implode(',', $fid) . ") ");
-				foreach ($fid as $k => $v) {
-					$data = " course_id = '$id' ";
-					$data .= ", description = '{$type[$k]}' ";
-					$data .= ", amount = '{$amount[$k]}' ";
-					if (empty($v)) {
-						$save2[] = $this->db->query("INSERT INTO fees set $data");
-					} else {
-						$save2[] = $this->db->query("UPDATE fees set $data where id = $v");
-					}
-				}
-				if (isset($save2))
-					return 1;
-			}
-		}
-	}
 
 
+
+	// -------------------------- -------------------------------------------------------------------
+	//		students
+	// -------------------------- -------------------------------------------------------------------
+
 	/**
-	 * delete course
-	 *
-	 * @return mixed
+	 * fetch students list and display in table
+	 * 
+	 * @return	void
 	 */
-	function delete_course()
+	function studentsList()
 	{
-		extract($_POST);
-		$delete = $this->db->query("DELETE FROM courses where id = " . $id);
-		$delete2 = $this->db->query("DELETE FROM fees where course_id = " . $id);
-		if ($delete && $delete2) {
-			return 1;
-		}
-	}
+
+		$student = $this->db->query("SELECT s.id, s.photo, s.name, s.id_no, s.dob, s.gender, s.email, h.house_name, c.class_name FROM student s join houses h on s.house_id = h.id join class_streams c on s.class_id = c.id order by s.name asc ");
+		while ($row = $student->fetch_assoc()) :
+?>
+			<tr>
+				<td><?php echo $row['class_name'] ?></td>
+				<td>
+					<p><img src="<?php echo $row['photo'] ?>" alt="" class="img-fluid" style="height: 50px"></p>
+				</td>
+				<td>
+					<p> <b><?php echo $row['id_no'] ?></b></p>
+				</td>
+				<td>
+					<p> <b><?php echo ucwords($row['name']) ?></b></p>
+				</td>
+				<td class="">
+					<p class="small">DOB: <i><b><?php echo $row['dob'] ?></i></p>
+					<p class="small">Gender: <i><b><?php echo $row['gender'] ?></i></p>
+					<p class="small">Email: <i><b><?php echo $row['email'] ?></i></p>
+					<p class="small">House: <i><b><?php echo $row['house_name'] ?></i></p>
+				</td>
+				<td class="text-center">
+					<button class="btn btn-sm btn-outline-primary edit_student" type="button" data-id="<?php echo $row['id'] ?>">Edit</button>
+					<button class="btn btn-sm btn-outline-danger delete_student" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
+				</td>
+			</tr>
+		<?php endwhile;
+	} // end
 
 
 	/**
@@ -654,6 +625,166 @@ class MainClass extends DBConnect
 
 
 
+
+
+	// -------------------------- -------------------------------------------------------------------
+	//		fees and payments
+	// -------------------------- -------------------------------------------------------------------
+
+
+
+	/**
+	 * delete fees structure
+	 *
+	 * @return mixed
+	 */
+	function delete_fees_structure()
+	{
+		extract($_POST);
+		$smtpt = $this->db->query("SELECT * FROM class_details where fees_id = " . $id)->num_rows;
+		if ($smtpt > 0) {
+			return 2;
+		} else {
+			$delete = $this->db->query("DELETE FROM fees where id = " . $id);
+			if ($delete)
+				return 1;
+		}
+	} // end
+
+
+
+	/**
+	 * fetch fees structure
+	 *
+	 * @return mixed
+	 */
+	function fetch_all_fees_structure()
+	{
+
+		try {
+			$stmt = $this->pdo->prepare("SELECT * from fees");
+			$stmt->execute();
+			$results = $stmt->fetchAll();
+
+			if ($results) {
+
+				//
+				$view = "<div class='table-responsive'>";
+				$view .= '<table class="table table-hover table-stripped" id="fees_structure_dt">';
+				$view .= '<thead class="bg-secondary text-light">';
+				$view .= '<tr>';
+				$view .= '<th scope="col">#</th>';
+				$view .= '<th scope="col">Section</th>';
+				$view .= '<th scope="col">Amount</th>';
+				$view .= '<th scope="col">Action</th>';
+				$view .= '</tr>';
+				$view .= "</thead>";
+				$view .= "</body>";
+				$cnt = 1;
+				foreach ($results as $result) {
+
+					$view .= '<tr id="tr_fee_' . $result['id'] . '">';
+					$view .= '<th scope="row">' . $cnt . '</th>';
+					$view .= '<td id="sch_section' . $result['id'] . '">' . $result['school_section'] . '</td>';
+					$view .= '<td id="sch_amount' . $result['id'] . '">' . number_format($result['amount'], 2) . '</td>';
+					$view .= '<td><div class="btn-group btn-group-sm" role="group" aria-label="action buttons"><button type="button" class="btn btn-sm btn-info edit_fees_structure" data-id="' . $result['id'] . '"><i class="bi-pencil" role="img" aria-label="edit"></i> Edit</button><button type="button" class="btn btn-sm btn-danger delete_fees_structure" data-id="' . $result['id'] . '"><i class="bi-x-circle" role="img" aria-label="delete"></i> Delete</button></div></td>';
+					$view .= '</tr>';
+					$cnt++;
+				}
+
+				$view .= "</body>";
+				$view .= "</table>";
+				$view .= "</div>";
+				//
+				return $this->json_response(200, $view, true);
+			} else {
+				$view = '<div class="alert alert-info fade show d-flex align-items-center justify-content-center" role="alert"><i class="bi-info-circle-fill flex-shrink-0 mr-2" width="24" height="24" role="img" aria-label="Danger:"></i><div>No fee structure added yet!</div></div>';
+				//
+				return $this->json_response(200, $view, true);
+			}
+		} catch (Exception $e) {
+			$view = '<div class="alert alert-dange fade show d-flex align-items-center justify-content-center" role="alert"><i class="bi-exclamation-triangle-fill flex-shrink-0 mr-2" width="24" height="24" role="img" aria-label="Danger:"></i><div>Internal server. Failed to load fee structure!</div></div>';
+			//
+			$this->logToFile($e->getMessage());
+			//
+			return $this->json_response(500, $view, false);
+		}
+	} // end
+
+
+
+	/**
+	 * save school fees
+	 *
+	 * @return mixed
+	 */
+	function save_school_fees()
+	{
+		$response = "";
+
+		try {
+			extract($_POST);
+
+			$dt = $this->genDateTime();
+
+			if (empty($section)) {
+				$response = $this->json_response(422, "<div class='alert alert-danger alert-dismissible fade show'>Please select section!<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
+			} elseif (empty($amount)) {
+				$response = $this->json_response(422, "<div class='alert alert-danger alert-dismissible fade show'>Please enter amount!<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
+			} elseif (!is_numeric($amount)) {
+				$response = $this->json_response(422, "<div class='alert alert-danger alert-dismissible fade show'>Please enter a valid amount!<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
+			} else {
+
+				if (empty($sch_fees_id)) {
+
+					$save = $this->pdo->prepare("INSERT into fees (school_section, amount, created_at, updated_at) values (?, ?, ?, ?)")->execute([$section, $amount, $dt, $dt]);
+					if ($save) {
+						$response = $this->json_response(200, "<div class='alert alert-success alert-dismissible fade show'>New school fees structure added!<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>", true);
+					} else {
+						$response = $this->json_response(422, "<div class='alert alert-danger alert-dismissible fade show'>Error adding new school fees structure!<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
+					}
+					//
+				} else {
+					$update = $this->pdo->prepare("UPDATE fees set school_section = ?, amount = ?, updated_at = ? where id = ?")->execute([$section, $amount, $dt, $sch_fees_id]);
+					if ($update) {
+						$response = $this->json_response(200, "<div class='alert alert-success alert-dismissible fade show'>School fees structure updated!<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>", true);
+					} else {
+						$response = $this->json_response(422, "<div class='alert alert-danger alert-dismissible fade show'>Error updating school fees structure!<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
+					}
+					//
+				}
+			}
+		} catch (Exception $e) {
+			//
+			$this->error_logs($e->getMessage());
+			//
+			$this->logToFile($e->getMessage());
+			//
+			$response = $this->json_response(500, "<div class='alert alert-danger alert-dismissible fade show'>Internal server error. Please try again later.<button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
+		}
+		//
+		return $response;
+	} // end
+
+
+
+	/**
+	 * fetch fees
+	 *
+	 * @return mixed
+	 */
+	function fetch_fees()
+	{
+		$data = array();
+		$stmt = $this->pdo->prepare("SELECT * FROM fees");
+		$stmt->execute();
+		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			$data[] = $row;
+		}
+		return $data;
+	} // end
+
+
 	/**
 	 * save fees
 	 *
@@ -702,8 +833,7 @@ class MainClass extends DBConnect
 		if ($delete) {
 			return 1;
 		}
-	}
-
+	} // end
 
 
 	/**
@@ -736,7 +866,7 @@ class MainClass extends DBConnect
 		}
 		if ($save)
 			return json_encode(array('ef_id' => $ef_id, 'pid' => $id, 'status' => 1));
-	}
+	} // end
 
 
 	/**
@@ -751,7 +881,7 @@ class MainClass extends DBConnect
 		if ($delete) {
 			return 1;
 		}
-	}
+	} // end
 
 
 	/**
@@ -764,10 +894,11 @@ class MainClass extends DBConnect
 		$i = 1;
 		$fees = $this->db->query("SELECT ef.*,s.name as sname,s.id_no FROM student_ef_list ef inner join student s on s.id = ef.student_id order by s.name asc ");
 		while ($row = $fees->fetch_assoc()) :
+
 			$paid = $this->db->query("SELECT sum(amount) as paid FROM payments where ef_id=" . $row['id']);
 			$paid = $paid->num_rows > 0 ? $paid->fetch_array()['paid'] : '';
 			$balance = $row['total_fee'] - $paid;
-?>
+		?>
 			<tr>
 				<td class="text-center"><?php echo $i++ ?></td>
 				<td>
@@ -848,73 +979,6 @@ class MainClass extends DBConnect
 
 
 	/**
-	 * courses
-	 */
-	function courses()
-	{
-
-		$i = 1;
-		$course = $this->db->query("SELECT * FROM courses  order by course asc ");
-		while ($row = $course->fetch_assoc()) :
-			?>
-			<tr>
-				<td class="text-center"><?php echo $i++ ?></td>
-				<td>
-					<p> <b><?php echo $row['course'] . " - " . $row['level'] ?></b></p>
-				</td>
-				<td class="">
-					<p><small><i><b><?php echo $row['description'] ?></i></small></p>
-				</td>
-				<td class="text-right">
-					<p> <b><?php echo number_format($row['total_amount'], 2) ?></b></p>
-				</td>
-				<td class="text-center">
-					<button class="btn btn-sm btn-outline-primary edit_course" type="button" data-id="<?php echo $row['id'] ?>">Edit</button>
-					<button class="btn btn-sm btn-outline-danger delete_course" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
-				</td>
-			</tr>
-		<?php endwhile;
-	} // end
-
-
-	/**
-	 * fetch students list and display in table
-	 * 
-	 * @return	void
-	 */
-	function studentsList()
-	{
-
-		$student = $this->db->query("SELECT s.id, s.photo, s.name, s.id_no, s.dob, s.gender, s.email, h.house_name, c.class_name FROM student s join houses h on s.house_id = h.id join class_streams c on s.class_id = c.id order by s.name asc ");
-		while ($row = $student->fetch_assoc()) :
-		?>
-			<tr>
-				<td><?php echo $row['class_name'] ?></td>
-				<td>
-					<p><img src="<?php echo $row['photo'] ?>" alt="" class="img-fluid" style="height: 50px"></p>
-				</td>
-				<td>
-					<p> <b><?php echo $row['id_no'] ?></b></p>
-				</td>
-				<td>
-					<p> <b><?php echo ucwords($row['name']) ?></b></p>
-				</td>
-				<td class="">
-					<p class="small">DOB: <i><b><?php echo $row['dob'] ?></i></p>
-					<p class="small">Gender: <i><b><?php echo $row['gender'] ?></i></p>
-					<p class="small">Email: <i><b><?php echo $row['email'] ?></i></p>
-					<p class="small">House: <i><b><?php echo $row['house_name'] ?></i></p>
-				</td>
-				<td class="text-center">
-					<button class="btn btn-sm btn-outline-primary edit_student" type="button" data-id="<?php echo $row['id'] ?>">Edit</button>
-					<button class="btn btn-sm btn-outline-danger delete_student" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
-				</td>
-			</tr>
-		<?php endwhile;
-	} // end
-
-
-	/**
 	 * payment reports
 	 * 
 	 * @return	void
@@ -929,7 +993,7 @@ class MainClass extends DBConnect
 		$payments = $stmt->get_result();
 
 		if ($payments) {
-		?>
+			?>
 			<tbody>
 				<?php
 				while ($row = $payments->fetch_assoc()) :
@@ -1125,43 +1189,12 @@ class MainClass extends DBConnect
 		}
 
 
-		/**
-		 * fetch teachers list
-		 * 
-		 * @return void
-		 */
-		function teachersList()
-		{
-			$stmt = $this->db->query("SELECT * FROM teachers order by teacher_names asc");
-			while ($row = $stmt->fetch_assoc()) :
-				?>
-				<tr>
-					<td>
-						<p><img src="<?php echo $row['photo'] ?>" alt="" class="img-fluid" style="height: 50px"></p>
-					</td>
-					<td>
-						<p> <b><?php echo $row['teacher_names'] ?></b></p>
-					</td>
-					<td>
-						<p> <b><?php echo ucwords($row['teacher_location_address']) ?></b></p>
-					</td>
-					<td>
-						<p> <b><?php echo ucwords($row['teacher_salary']) ?></b></p>
-					</td>
-					<td class="">
-						<p class="small">Mob: <i><b><?php echo $row['teacher_tel'] ?></i></p>
-						<p class="small">DOB: <i><b><?php echo $row['teacher_dob'] ?></i></p>
-						<p class="small">Gender: <i><b><?php echo $row['teacher_sex'] ?></i></p>
-						<p class="small">Email: <i><b><?php echo $row['teacher_email'] ?></i></p>
-						<p class="small">Education: <i><b><?php echo $row['teacher_education'] ?></i></p>
-					</td>
-					<td class="text-center">
-						<button class="btn btn-sm btn-outline-primary edit_teacher" type="button" data-id="<?php echo $row['id'] ?>">Edit</button>
-						<button class="btn btn-sm btn-outline-danger delete_teacher" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
-					</td>
-				</tr>
-			<?php endwhile;
-		} // end
+
+
+
+		// -------------------------- -------------------------------------------------------------------
+		//		school terms
+		// -------------------------- -------------------------------------------------------------------
 
 
 
@@ -1269,6 +1302,71 @@ class MainClass extends DBConnect
 			//
 			$response = array("msg" => $msg, "bool" => $bool);
 			return json_encode($response);
+		} // end
+
+
+
+
+
+		// -------------------------- -------------------------------------------------------------------
+		//		teachers
+		// -------------------------- -------------------------------------------------------------------
+
+
+		/**
+		 * fetch teachers
+		 *
+		 * @return mixed
+		 */
+		function fetch_teachers()
+		{
+			$data = array();
+			$stmt = $this->pdo->prepare("SELECT * FROM teachers order by teacher_names asc");
+			$stmt->execute();
+			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$data[] = $row;
+			}
+			return $data;
+		} // end
+
+
+		/**
+		 * fetch teachers list
+		 * 
+		 * @return void
+		 */
+		function teachersList()
+		{
+			$stmt = $this->db->query("SELECT * FROM teachers order by teacher_names asc");
+
+			foreach ($this->fetch_teachers() as $key => $row) {
+				?>
+				<tr>
+					<td>
+						<p><img src="<?php echo $row['photo'] ?>" alt="" class="img-fluid" style="height: 50px"></p>
+					</td>
+					<td>
+						<p> <b><?php echo $row['teacher_names'] ?></b></p>
+					</td>
+					<td>
+						<p> <b><?php echo ucwords($row['teacher_location_address']) ?></b></p>
+					</td>
+					<td>
+						<p> <b><?php echo ucwords($row['teacher_salary']) ?></b></p>
+					</td>
+					<td class="">
+						<p class="small">Mob: <i><b><?php echo $row['teacher_tel'] ?></i></p>
+						<p class="small">DOB: <i><b><?php echo $row['teacher_dob'] ?></i></p>
+						<p class="small">Gender: <i><b><?php echo $row['teacher_sex'] ?></i></p>
+						<p class="small">Email: <i><b><?php echo $row['teacher_email'] ?></i></p>
+						<p class="small">Education: <i><b><?php echo $row['teacher_education'] ?></i></p>
+					</td>
+					<td class="text-center">
+						<button class="btn btn-sm btn-outline-primary edit_teacher" type="button" data-id="<?php echo $row['id'] ?>">Edit</button>
+						<button class="btn btn-sm btn-outline-danger delete_teacher" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
+					</td>
+				</tr>
+			<?php }
 		} // end
 
 
@@ -1418,9 +1516,80 @@ class MainClass extends DBConnect
 
 
 		// -------------------------- -------------------------------------------------------------------
-
+		//		parents
 		// -------------------------- -------------------------------------------------------------------
 
+
+
+		/**
+		 * add new parent or update existing information
+		 *
+		 * @return mixed
+		 */
+		function save_parent()
+		{
+			$response = array();
+
+			try {
+
+				//
+				$name 		= trim($_POST['name']);
+				$genders 	= trim($_POST['genders']);
+				$email 		= trim($_POST['email']);
+				$telcont 	= trim($_POST['telcont']);
+				$residence 	= trim($_POST['residence']);
+				$id 		= trim($_POST['id']);
+
+				$students 	= $_POST['students']; // array
+
+				// validation
+				if (empty($name)) {
+					$response = array("bool" => false, "msg" => "Please enter parent names!");
+				} elseif (empty($genders)) {
+					$response = array("bool" => false, "msg" => "Please select parent gender!");
+				} elseif (empty($email)) {
+					$response = array("bool" => false, "msg" => "Please enter parent email!");
+				} elseif (empty($telcont)) {
+					$response = array("bool" => false, "msg" => "Please enter tel contact of parent!");
+				} elseif (empty($email)) {
+					$response = array("bool" => false, "msg" => "Please enter parent email!");
+				} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+					$response = array("bool" => false, "msg" => "Please enter valid email address!");
+				} elseif (empty($residence)) {
+					$response = array("bool" => false, "msg" => "Please enter location address / street!");
+				} else {
+
+					//
+					$dt = $this->genDateTime();
+					//
+					$strstudent = implode(", ", $students);
+
+					//
+					if (empty($id)) {
+
+						// new teachers
+						$save = $this->pdo->prepare("INSERT INTO parents (student_id, parent_names, contacts, email, residence, gender, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)");
+						$save->execute([$strstudent, $name, $telcont, $email, $residence, $genders, $dt, $dt]);
+
+						//
+						$response = array("bool" => true, "msg" => "New parent added!");
+					} else {
+
+						//
+						$this->pdo->prepare("UPDATE parents set student_id = ?, parent_names = ?, contacts = ?, email = ?, residence = ?, gender = ?, updated_at = ? where id = ?")->execute([$strstudent, $name, $telcont, $email, $residence, $genders, $dt, $id]);
+						//
+						$response = array("bool" => true, "msg" => "Parent information updated!");
+					}
+				}
+			} catch (Exception $e) {
+				//
+				$this->logToFile($e->getMessage());
+				//
+				$response = array("bool" => false, "msg" => "Internal server error. Please try again later:");
+			}
+			//
+			return json_encode($response);
+		} // end
 
 
 		/**
@@ -1514,79 +1683,7 @@ class MainClass extends DBConnect
 						<button class="btn btn-sm btn-outline-danger delete_parent" type="button" data-id="<?php echo $row['parentid'] ?>">Delete</button>
 					</td>
 				</tr>
-	<?php endwhile;
-		} // end
-
-
-
-		/**
-		 * add new parent or update existing information
-		 *
-		 * @return mixed
-		 */
-		function save_parent()
-		{
-			$response = array();
-
-			try {
-
-				//
-				$name 		= trim($_POST['name']);
-				$genders 	= trim($_POST['genders']);
-				$email 		= trim($_POST['email']);
-				$telcont 	= trim($_POST['telcont']);
-				$residence 	= trim($_POST['residence']);
-				$id 		= trim($_POST['id']);
-
-				$students 	= $_POST['students']; // array
-
-				// validation
-				if (empty($name)) {
-					$response = array("bool" => false, "msg" => "Please enter parent names!");
-				} elseif (empty($genders)) {
-					$response = array("bool" => false, "msg" => "Please select parent gender!");
-				} elseif (empty($email)) {
-					$response = array("bool" => false, "msg" => "Please enter parent email!");
-				} elseif (empty($telcont)) {
-					$response = array("bool" => false, "msg" => "Please enter tel contact of parent!");
-				} elseif (empty($email)) {
-					$response = array("bool" => false, "msg" => "Please enter parent email!");
-				} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-					$response = array("bool" => false, "msg" => "Please enter valid email address!");
-				} elseif (empty($residence)) {
-					$response = array("bool" => false, "msg" => "Please enter location address / street!");
-				} else {
-
-					//
-					$dt = $this->genDateTime();
-					//
-					$strstudent = implode(", ", $students);
-
-					//
-					if (empty($id)) {
-
-						// new teachers
-						$save = $this->pdo->prepare("INSERT INTO parents (student_id, parent_names, contacts, email, residence, gender, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)");
-						$save->execute([$strstudent, $name, $telcont, $email, $residence, $genders, $dt, $dt]);
-
-						//
-						$response = array("bool" => true, "msg" => "New parent added!");
-					} else {
-
-						//
-						$this->pdo->prepare("UPDATE parents set student_id = ?, parent_names = ?, contacts = ?, email = ?, residence = ?, gender = ?, updated_at = ? where id = ?")->execute([$strstudent, $name, $telcont, $email, $residence, $genders, $dt, $id]);
-						//
-						$response = array("bool" => true, "msg" => "Parent information updated!");
-					}
-				}
-			} catch (Exception $e) {
-				//
-				$this->logToFile($e->getMessage());
-				//
-				$response = array("bool" => false, "msg" => "Internal server error. Please try again later:");
-			}
-			//
-			return json_encode($response);
+			<?php endwhile;
 		} // end
 
 
@@ -1594,7 +1691,7 @@ class MainClass extends DBConnect
 
 
 		// -------------------------- -------------------------------------------------------------------
-
+		//		requirements
 		// -------------------------- -------------------------------------------------------------------
 
 
@@ -1743,6 +1840,184 @@ class MainClass extends DBConnect
 			}
 			//
 			return $response;
+		} // end
+
+
+
+
+
+		// -------------------------- -------------------------------------------------------------------
+		//		classes, streams
+		// -------------------------- -------------------------------------------------------------------
+
+
+
+		/**
+		 * save / edit new class, stream
+		 *
+		 * @return mixed
+		 */
+		function save_class()
+		{
+
+			try {
+				extract($_POST);
+
+				//
+				$classnameid = $_POST['classnameid'];
+				$classinfoid = $_POST['classinfoid'];
+				$name 		 = $_POST['class_name'];
+				$teacher 	 = $_POST['class_teacher'];
+				$fees 		 = $_POST['class_fees'];
+				$description = trim($_POST['class_description']);
+
+				//
+				$response = "";
+
+				//
+				if (empty($name)) {
+					$response = $this->json_response(422, "Please enter class name!");
+				} elseif (empty($teacher)) {
+					$response = $this->json_response(422, "Please select teacher!");
+				} elseif (empty($fees)) {
+					$response = $this->json_response(422, "Please select fees!");
+				} elseif (!empty($description) && strlen($description) > 120) {
+					$response = $this->json_response(422, "Description cannot exceed 120 characters!");
+				} else {
+
+					$check = $this->db->query("SELECT * FROM class_streams where class_name ='" . $name . "' " . (!empty($classnameid) ? " and id != {$classnameid} " : ''))->num_rows;
+					if ($check > 0) {
+						$response = $this->json_response(422, "Class name entered already exists!");
+					} else {
+
+						//
+						$dt = $this->genDateTime();
+						//
+						$description = !empty($description) ? $description : null;
+
+						if (empty($classnameid) && empty($classinfoid)) {
+
+							// save class name
+							$save = $this->pdo->prepare("INSERT INTO class_streams (class_name, created_at, updated_at) values (?,?,?)");
+							$clname = $save->execute([$name, $dt, $dt]);
+							if ($clname) {
+								$id = $this->pdo->lastInsertId();
+
+								// save class details
+								$this->pdo->prepare("INSERT INTO class_details (class_id, teacher_id, fees_id, class_details, created_at, updated_at) values(?,?,?,?,?,?)")->execute([$id, $teacher, $fees, $description, $dt, $dt]);
+								//
+								$response = $this->json_response(200, "New class added!", true);
+							}
+						} else {
+							$uclassname = $this->pdo->prepare("UPDATE class_streams set class_name = ?, updated_at = ? where id = ?")->execute([$name, $dt, $classnameid]);
+
+							$uclassinfo = $this->pdo->prepare("UPDATE class_details set teacher_id = ?, fees_id = ?, class_details = ?, updated_at = ? where class_id = ? and id = ?")->execute([$teacher, $fees, $description, $dt, $classnameid, $classinfoid]);
+
+							if ($uclassname && $uclassinfo) {
+								//
+								$response = $this->json_response(200, "Class updated!", true);
+							} else {
+								$response = $this->json_response(422, "Error updating class details. Please try again!");
+							}
+						}
+					} // unique class name
+
+				} // validation
+
+			} catch (Exception $e) {
+				//
+				$this->logToFile($e->getMessage());
+				//
+				$this->error_logs($e);
+				//
+				$response = $this->json_response(500, "Internal server error. Please try again later!");
+			}
+
+			return $response;
+		} // end
+
+
+		/**
+		 * delete class
+		 *
+		 * @return mixed
+		 */
+		function delete_class()
+		{
+			extract($_POST);
+			$delete = $this->db->query("DELETE FROM courses where id = " . $id);
+			$delete2 = $this->db->query("DELETE FROM fees where course_id = " . $id);
+			if ($delete && $delete2) {
+				return 1;
+			}
+		}
+
+
+		/**
+		 * fetch selected class details
+		 *
+		 * @param  int $classnameid
+		 * @param  int $classinfoid
+		 * @return mixed
+		 */
+		function fetch_sel_class_info($classnameid, $classinfoid)
+		{
+
+			$stmt = $this->pdo->prepare("SELECT a.id as classnameid, a.class_name, b.id as classinfoid, b.teacher_id, b.fees_id, b.class_details FROM class_streams a join class_details b on a.id = b.class_id where a.id = ? and b.id = ?");
+			$stmt->execute([$classnameid, $classinfoid]);
+			$results = $stmt->fetchObject();
+			return $results;
+		} // end
+
+
+
+		/**
+		 * classes
+		 */
+		function fetchClasses()
+		{
+			$i = 1;
+			$stmt = $this->pdo->prepare("SELECT a.id as classnameid, a.class_name, b.id as classinfoid, b.teacher_id, b.fees_id, b.class_details FROM class_streams a join class_details b on a.id = b.class_id order by a.class_name asc");
+			$stmt->execute();
+			$results = $stmt->fetchAll();
+
+			// get teachers
+			$sql_t = $this->pdo->prepare("SELECT teacher_names from teachers where id = ?");
+			// get fees
+			$sql_f = $this->pdo->prepare("SELECT school_section, amount from fees where id = ?");
+
+			foreach ($results as $row) {
+
+				$teacherid = $row['teacher_id'];
+				$feesid = $row['fees_id'];
+
+				$sql_t->execute([$teacherid]);
+				$teachers = $sql_t->fetchObject();
+
+				//
+				$sql_f->execute([$feesid]);
+				$fees = $sql_f->fetchObject();
+			?>
+				<tr>
+					<td class="text-center"><?php echo $i++ ?></td>
+					<td>
+						<p> <b><?php echo $row['class_name'] ?></b></p>
+					</td>
+					<td class="">
+						<p><?php echo $teachers->teacher_names ?></p>
+					</td>
+					<td class="">
+						<p><small><i><b><?php echo is_null($row['class_details']) ? na : $row['class_details']; ?></i></small></p>
+					</td>
+					<td class="text-right">
+						<p><b><?php echo $fees->school_section . ' | ' . number_format($fees->amount, 2) ?></b></p>
+					</td>
+					<td class="text-center">
+						<button class="btn btn-sm btn-outline-primary edit_class" type="button" data-classinfo="<?php echo $row['classinfoid'] ?>" data-id="<?php echo $row['classnameid'] ?>">Edit</button>
+						<button class="btn btn-sm btn-outline-danger delete_class" type="button" data-classinfo="<?php echo $row['classinfoid'] ?>" data-id="<?php echo $row['classnameid'] ?>">Delete</button>
+					</td>
+				</tr>
+	<?php }
 		} // end
 
 
