@@ -35,10 +35,12 @@ $classes = $crud->getClasses();
                 </select>
             </div>
         </div>
+
+
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="id_no" class="control-label">Id No.</label>
-                <input type="text" class="form-control" name="id_no" value="<?php echo $crud->generateStudentIds(); ?>" readonly>
+                <input type="text" class="form-control" name="id_no" value="<?php echo isset($class_id) ? $id_no : $crud->generateStudentIds(); ?>" readonly>
             </div>
             <div class="form-group col-md-6">
                 <label for="stud_house" class="control-label">House</label>
@@ -99,19 +101,24 @@ $classes = $crud->getClasses();
             dataType: "json",
             contentType: false,
             processData: false,
-            success: function(response) {
-                if (response.bool == true) {
+        }).done(function(response) {
 
-                    alert_toast(response.msg, 'success')
-                    setTimeout(function() {
-                        location.reload()
-                    }, 1000)
-                } else {
-                    $('#msg').html('<div class="alert alert-danger mx-2">' + response.msg + '</div>')
-                    end_load()
-                }
+            if (response.bool === true) {
+
+                alert_toast(response.msg, 'success')
+                setTimeout(function() {
+                    location.reload()
+                }, 1000)
+            } else {
+                $('#msg').html('<div class="alert alert-danger mx-2">' + response.msg + '</div>')
+                end_load()
             }
-        })
+
+        }).fail(function(jqXHR) {
+            end_load()
+            let response = JSON.parse(jqXHR.responseText)
+            $('#msg').html('<div class="alert alert-danger mx-2">' + response.msg + '</div>')
+        });
     })
 
     $('.select2').select2({

@@ -33,7 +33,7 @@
         <!-- small box -->
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>53<sup style="font-size: 20px">%</sup></h3>
+                <h3><?php echo $crud->statsBoxes()['fees_paid_so_far']; ?><sup style="font-size: 20px">%</sup></h3>
 
                 <p>Fees Payment</p>
             </div>

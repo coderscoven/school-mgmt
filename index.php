@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<?php include 'classes/MainClass.php'; ?>
+<?php
+include 'classes/MainClass.php';
+
+// breadcrumb
+$breadcrumb = $crud->school_term_breadcrumb();
+?>
 
 <head>
   <meta charset="utf-8">
@@ -70,14 +75,17 @@
 <body>
   <?php include 'topbar.php' ?>
   <?php include 'navbar.php' ?>
-  <div class="toast" id="alert_toast" role="alert" aria-live="assertive" aria-atomic="true">
+  <div class="toast d-print-none" id="alert_toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-body text-white">
     </div>
   </div>
 
   <main id="view-panel">
-    <?php $page = isset($_GET['page']) ? $_GET['page'] : 'home'; ?>
-    <section class="content-header">
+    <?php
+    $page = isset($_GET['page']) ? $_GET['page'] : 'home';
+    $trackStudent = isset($_GET['student']) ? $_GET['student'] : n_a;
+    ?>
+    <section class="content-header d-print-none">
       <div class="container-fluid">
         <div class="row mb-3">
           <div class="col-sm-6">
@@ -90,12 +98,12 @@
                 $pageText = "Home";
                 break;
               case "fees":
-                $pagetitle = '<h1><i class="fas fa-money-check" role="img" aria-label="Fees"></i> FEES</h1>';
-                $pageText = "Fees";
+                $pagetitle = '<h1><i class="fas fa-money-check" role="img" aria-label="Fees"></i> STUDENT FEES</h1>';
+                $pageText = "Student Fees";
                 break;
               case "payments":
-                $pagetitle = '<h1><i class="fas fa-receipt" role="img" aria-label="Payments"></i> PAYMENTS</h1>';
-                $pageText = "Payments";
+                $pagetitle = '<h1><i class="fas fa-receipt" role="img" aria-label="Payments"></i> MAKE PAYMENTS</h1>';
+                $pageText = "Make Payments";
                 break;
               case "classes":
                 $pagetitle = '<h1><i class="fas fa-scroll" role="img" aria-label="Classes"></i> Classes</h1>';
@@ -104,6 +112,10 @@
               case "teachers":
                 $pagetitle = '<h1><i class="fas fa-chalkboard-teacher" role="img" aria-label="Teachers"></i> TEACHERS</h1>';
                 $pageText = "Teachers";
+                break;
+              case "roll-call":
+                $pagetitle = '<h1><i class="fas fa-bullhorn" role="img" aria-label="Roll call"></i> STUDENT ROLL CALL</h1>';
+                $pageText = "Roll call";
                 break;
               case "students":
                 $pagetitle = '<h1><i class="fas fa-graduation-cap" role="img" aria-label="Students"></i> STUDENTS</h1>';
@@ -118,21 +130,37 @@
                 $pageText = "Parents";
                 break;
               case "payments_report":
-                $pagetitle = '<h1><i class="fas fa-th-list" role="img" aria-label="Reports"></i> REPORTS</h1>';
-                $pageText = "Reports";
+                $pagetitle = '<h1><i class="fas fa-th-list" role="img" aria-label="Reports"></i> PAYMENT REPORT</h1>';
+                $pageText = "Payment Reports";
+                break;
+              case "requirements_report":
+                $pagetitle = '<h1><i class="fas fa-th-list" role="img" aria-label="Reports"></i> REQUIREMENT REPORT</h1>';
+                $pageText = "Requirement Reports";
+                break;
+              case "students_report":
+                $pagetitle = '<h1><i class="fas fa-th-list" role="img" aria-label="Reports"></i> STUDENTS REPORT</h1>';
+                $pageText = "Students Reports";
+                break;
+              case "teacher_details_report":
+                $pagetitle = '<h1 class="text-uppercase"><i class="fas fa-th-list" role="img" aria-label="Reports"></i> Teacher details REPORT</h1>';
+                $pageText = "Teacher Details Reports";
                 break;
               case "users":
                 $pagetitle = '<h1><i class="fas fa-users" role="img" aria-label="Users"></i> USERS</h1>';
                 $pageText = "Users";
                 break;
+              case "payment-history":
+                $pagetitle = '<h1><i class="fas fa-info-circle" role="img" aria-label="Payments"></i> PAYMENTS</h1>';
+                $pageText = "Payments";
+                break;
             }
             ?>
             <?php echo $pagetitle; ?>
           </div>
-          <div class="col-sm-6">
+          <div class="col-sm-6 d-print-none">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="javascript:;"><?php echo "Term 1" ?></a></li>
-              <li class="breadcrumb-item active"><?php echo 2022; ?></li>
+              <li class="breadcrumb-item"><a href="javascript:;" id="set_school_term"><?php echo "Term " . $breadcrumb['term']; ?></a></li>
+              <li class="breadcrumb-item active" id="school_term_year"><?php echo $breadcrumb['year'] ?></li>
             </ol>
           </div>
         </div>

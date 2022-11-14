@@ -16,6 +16,34 @@ body {
   font-size: 12px;
 }
 
+.form-control::-webkit-input-placeholder {
+  font-size: 90%;
+}
+
+.form-control::-moz-placeholder {
+  font-size: 90%;
+}
+
+.form-control:-ms-input-placeholder {
+  font-size: 90%;
+}
+
+.form-control::-ms-input-placeholder {
+  font-size: 90%;
+}
+
+.form-control::placeholder {
+  font-size: 90%;
+}
+
+.form-control {
+  border-radius: 0;
+}
+
+.form-control:focus {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
 a {
   color: #1977cc;
 }
@@ -376,6 +404,13 @@ h6 {
   .appointment-btn {
     margin: 0 48px 0 0;
     padding: 6px 18px;
+  }
+}
+
+@media (max-width: 767px) {
+
+  nav#sidebar {
+    margin-top: 2em;
   }
 }
 
@@ -1671,7 +1706,10 @@ nav#sidebar {
   top: 2.5em;
   /* overflow-x: hidden;
   overflow-y: scroll; */
+  height: 100vh;
 }
+
+
 
 a.nav-item {
   position: relative;
@@ -1716,6 +1754,15 @@ main#view-panel {
 
 main#main {
   /*margin-top: 8rem;*/
+}
+
+#login-body {
+  /* background-image: linear-gradient(rgba(248, 249, 250, 0.8), rgba(0, 0, 0, 0.9)), url('../img/banner1.jpg'); */
+  background: url("../img/banner-dark.jpg");
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 main#main.login {

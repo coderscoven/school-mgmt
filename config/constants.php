@@ -37,3 +37,5 @@ define("no", "no");
 
 //
 define("na", "N/A");
+
+define("n_a", "na");

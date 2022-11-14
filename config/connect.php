@@ -161,6 +161,17 @@ class DBConnect
     } // end
 
 
+    /**
+     * array response
+     *
+     * @param  mixed $msg
+     * @param  mixed $bool
+     * @return mixed
+     */
+    protected function array_response($msg, $bool)
+    {
+        return json_encode(array("msg" => $msg, "bool" => $bool));
+    }
 
 
     /**

@@ -43,7 +43,7 @@ ob_end_flush();
 	}
 </style>
 
-<body class="bg-dark">
+<body id="login-body">
 
 
 	<main id="main">
@@ -55,8 +55,8 @@ ob_end_flush();
 				</a>
 				<h4 class="text-white font-weight-bold"><?php echo $_SESSION['system']['name'] ?></h4>
 			</div>
-			<div id="login-center" class="bg-dark row justify-content-center">
-				<div class="card border-0 shadow col-md-4">
+			<div id="login-center" class="row justify-content-center">
+				<div class="card border-0 shadow col-md-4 bg-dark text-light">
 					<div class="card-body">
 						<form id="login-form" role="form">
 							<div class="form-group">

@@ -29,20 +29,16 @@ if (isset($_GET['id'])) {
 				<small><i>Leave this blank if you dont want to change the password.</i></small>
 			<?php endif; ?>
 		</div>
-		<?php if (isset($meta['type']) && ($meta['type'] == 2 || $meta['type'] == 3)) : ?>
-			<input type="hidden" name="type" value="<?php echo $meta['type']; ?>">
-		<?php else : ?>
-			<?php if (!isset($_GET['mtype'])) : ?>
-				<div class="form-group">
-					<label for="type">User Type</label>
-					<select name="type" id="type" class="custom-select">
-						<option value="1" <?php echo isset($meta['type']) && $meta['type'] == 1 ? 'selected' : '' ?>>Admin</option>
-						<option value="2" <?php echo isset($meta['type']) && $meta['type'] == 2 ? 'selected' : '' ?>>Bursar</option>
-						<option value="3" <?php echo isset($meta['type']) && $meta['type'] == 3 ? 'selected' : '' ?>>Teacher</option>
-					</select>
-				</div>
-			<?php endif; ?>
-		<?php endif; ?>
+
+		<div class="form-group">
+			<label for="accesslevel">Access level</label>
+			<select name="accesslevel" id="accesslevel" class="custom-select">
+				<option value="">--- select ---</option>
+				<option value="Admin" <?php echo isset($meta['access_level']) && $meta['access_level'] == LV_1 ? 'selected' : '' ?>>Admin</option>
+				<option value="Bursar" <?php echo isset($meta['access_level']) && $meta['access_level'] == LV_2 ? 'selected' : '' ?>>Bursar</option>
+				<option value="Teacher" <?php echo isset($meta['access_level']) && $meta['access_level'] == LV_3 ? 'selected' : '' ?>>Teacher</option>
+			</select>
+		</div>
 
 
 	</form>
@@ -54,11 +50,11 @@ if (isset($_GET['id'])) {
 		$.ajax({
 			url: 'ajax.php?action=save_user',
 			method: 'POST',
-			data: $(this).serialize(),
+			data: $('#manage-user').serialize(),
 			dataType: "json",
 		}).done(function(response) {
 
-			if (response.bool == true) {
+			if (response.bool === true) {
 				toastr.success(response.msg)
 				setTimeout(function() {
 					location.reload()

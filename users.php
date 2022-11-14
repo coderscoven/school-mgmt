@@ -15,7 +15,7 @@
 				<div class="card-body">
 					<div class="table-responsive">
 						<table class="table table-striped table-sm datatableClass">
-							<thead>
+							<thead class="bg-secondary text-light">
 								<tr>
 									<th scope="col">#</th>
 									<th scope="col">Name</th>

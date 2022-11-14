@@ -22,29 +22,33 @@
 							<strong>List of Payments</strong>
 						</div>
 						<div class="col-2">
-							<a class="btn btn-primary btn-block btn-sm" href="javascript:void(0)" id="new_payment">
-								<i class="fas fa-plus"></i> New
-							</a>
+							<div class="btn-group btn-group-sm float-right" role="group" aria-label="payment action button">
+								<button type="button" class="btn btn-warning" id="new_payment">
+									<i class="fas fa-plus"></i> New Payment
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div class="card-body">
-					<table class="table table-sm table-bordered table-hover datatableClass">
-						<thead>
-							<tr>
-								<th class="text-center">#</th>
-								<th class="">Date</th>
-								<th class="">ID No.</th>
-								<th class="">EF No.</th>
-								<th class="">Name</th>
-								<th class="">Paid Amount</th>
-								<th class="text-center">Action</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php echo $crud->payments();  ?>
-						</tbody>
-					</table>
+					<div class="table-responsive">
+						<table class="table table-sm table-striped table-hover datatableClass" id="makepayments_dt">
+							<thead class="bg-secondary text-light">
+								<tr>
+									<th scope="col">#</th>
+									<th scope="col">Date</th>
+									<th scope="col">Payslip serial</th>
+									<th scope="col">ID No.</th>
+									<th scope="col">Name</th>
+									<th scope="col">Amount paid</th>
+									<th scope="col" class="text-center">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php echo $crud->payments();  ?>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>

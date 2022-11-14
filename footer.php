@@ -1,7 +1,7 @@
-<div id="preloader"></div>
-<a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+<div id="preloader" class="d-print-none"></div>
+<a href="#" class="back-to-top d-print-none"><i class="icofont-simple-up"></i></a>
 
-<div class="modal fade" id="confirm_modal" role='dialog'>
+<div class="modal fade d-print-none" id="confirm_modal" role='dialog'>
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -17,7 +17,7 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="uni_modal" role='dialog'>
+<div class="modal fade d-print-none" id="uni_modal" role='dialog'>
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -32,7 +32,7 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="viewer_modal" role='dialog'>
+<div class="modal fade d-print-none" id="viewer_modal" role='dialog'>
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <button type="button" class="btn-close" data-dismiss="modal"><span class="fas fa-times"></span></button>
@@ -45,12 +45,21 @@
 <!-- // footer scripts -->
 <!-- .. jquery -->
 <script src="assets/vendor/jquery/jquery.min.js"></script>
-<!-- .. bootstrap -->
-<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- .. jquery ui -->
 <script src="assets/vendor/jquery-ui/jquery-ui.min.js"></script>
+<!-- .. bootstrap -->
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- .. datatables -->
 <script src="assets/vendor/dataTables/datatables.min.js"></script>
+<!-- ... datatables extensions for additional functionality -->
+<script src="assets/vendor/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="assets/vendor/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="assets/vendor/dataTables/jszip/dist/jszip.min.js"></script>
+<script src="assets/vendor/dataTables/pdfmake/pdfmake.js"></script>
+<script src="assets/vendor/dataTables/pdfmake/vfs_fonts.js"></script>
+<script src="assets/vendor/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="assets/vendor/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="assets/vendor/datatables-buttons/js/buttons.colVis.min.js"></script>
 <!-- .. jquery.easing -->
 <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
 <!-- .. validate -->
@@ -67,14 +76,9 @@
 <script src="assets/vendor/toastr/toastr.min.js"></script>
 <!-- .. moment -->
 <script src="assets/vendor/moment/moment.min.js"></script>
-<!-- .. fullcalendar -->
-<script src="assets/vendor/fullcalendar/main.min.js"></script>
-<script src="assets/vendor/fullcalendar-daygrid/main.min.js"></script>
-<script src="assets/vendor/fullcalendar-timegrid/main.min.js"></script>
-<script src="assets/vendor/fullcalendar-interaction/main.min.js"></script>
-<script src="assets/vendor/fullcalendar-bootstrap/main.min.js"></script>
+<script src="assets/vendor/daterangepicker/daterangepicker.js"></script>
 <!-- .. bootstrap-datepicker -->
-<script src="assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<!-- <script src="assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script> -->
 <!-- .. select2 -->
 <script src="assets/vendor/select2/js/select2.full.min.js"></script>
 <!-- overlayScrollbars -->
@@ -86,7 +90,13 @@
 <!-- .. jquery-te -->
 <script src="assets/js/jquery-te-1.4.0.min.js" charset="utf-8"></script>
 <?php if ($_GET['page'] == 'home') { ?>
-    <script src="assets/js/dashboard3.js"></script>
+    <!-- .. fullcalendar -->
+    <!-- <script src="assets/vendor/fullcalendar/main.min.js"></script>
+    <script src="assets/vendor/fullcalendar-daygrid/main.min.js"></script>
+    <script src="assets/vendor/fullcalendar-timegrid/main.min.js"></script>
+    <script src="assets/vendor/fullcalendar-interaction/main.min.js"></script>
+    <script src="assets/vendor/fullcalendar-bootstrap/main.min.js"></script> -->
+    <script src="assets/js/dashboard.js"></script>
 <?php } ?>
 <!-- .. site script -->
 <script src="assets/js/main.min.js"></script>

@@ -43,10 +43,11 @@
 					</div>
 				</div>
 				<div class="card-body">
-					<table class="table table-sm datatableClass table-hover">
+					<table class="table table-sm datatableClass table-hover" id="student_list_dt">
 						<thead class="bg-secondary text-light">
 							<tr>
 								<th scope="col">Class</th>
+								<th scope="col">Section</th>
 								<th scope="col">Photo</th>
 								<th scope="col">ID No.</th>
 								<th scope="col">Name</th>

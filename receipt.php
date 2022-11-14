@@ -1,13 +1,16 @@
 <?php
-$fees = $conn->query("SELECT ef.*,s.name as sname,s.id_no,concat(c.course,' - ',c.level) as `class` FROM student_ef_list ef inner join student s on s.id = ef.student_id inner join courses c on c.id = ef.course_id  where ef.id = {$_GET['ef_id']}");
+include 'classes/MainClass.php';
+
+$fees = $crud->payment_receipt($_GET['ef_id']);
 foreach ($fees->fetch_array() as $k => $v) {
 	$$k = $v;
 }
-$payments = $conn->query("SELECT * FROM payments where ef_id = $id ");
+$payments = $crud->sel_payments_info_efno($id);
 $pay_arr = array();
 while ($row = $payments->fetch_array()) {
 	$pay_arr[$row['id']] = $row;
 }
+// slip_serial
 ?>
 
 <style>
@@ -47,15 +50,15 @@ while ($row = $payments->fetch_array()) {
 	<hr>
 	<div class="flex">
 		<div class="w-50">
-			<p>EF. No: <b><?php echo $ef_no ?></b></p>
+			<p>Serial No: <b><?php echo isset($pay_arr[$_GET['pid']]) ? $pay_arr[$_GET['pid']]['slip_serial'] : '' ?></b></p>
 			<p>Student: <b><?php echo ucwords($sname) ?></b></p>
-			<p>Course/Level: <b><?php echo $class ?></b></p>
+			<p>Class: <b><?php echo $class_name ?></b></p>
 		</div>
 		<?php if ($_GET['pid'] > 0) : ?>
+
 			<div class="w-50">
-				<p>Payment Date: <b><?php echo isset($pay_arr[$_GET['pid']]) ? date("M d,Y", strtotime($pay_arr[$_GET['pid']]['date_created'])) : '' ?></b></p>
+				<p>Payment Date: <b><?php echo isset($pay_arr[$_GET['pid']]) ? (new DateTime($pay_arr[$_GET['pid']]['payment_date']))->format("M d, Y") : '' ?></b></p>
 				<p>Paid Amount: <b><?php echo isset($pay_arr[$_GET['pid']]) ? number_format($pay_arr[$_GET['pid']]['amount'], 2) : '' ?></b></p>
-				<p>Remarks: <b><?php echo isset($pay_arr[$_GET['pid']]) ? $pay_arr[$_GET['pid']]['remarks'] : '' ?></b></p>
 			</div>
 		<?php endif; ?>
 	</div>
@@ -72,13 +75,14 @@ while ($row = $payments->fetch_array()) {
 						<td width="50%" class='text-right'>Amount</td>
 					</tr>
 					<?php
-					$cfees = $conn->query("SELECT * FROM fees where course_id = $course_id");
+					$cfees = $crud->sel_fetch_amount($fees_id);
 					$ftotal = 0;
 					while ($row = $cfees->fetch_assoc()) {
+
 						$ftotal += $row['amount'];
 					?>
 						<tr>
-							<td><b><?php echo $row['description'] ?></b></td>
+							<td><b><?php echo $row['school_section'] ?></b></td>
 							<td class='text-right'><b><?php echo number_format($row['amount']) ?></b></td>
 						</tr>
 					<?php
@@ -100,11 +104,12 @@ while ($row = $payments->fetch_array()) {
 					<?php
 					$ptotal = 0;
 					foreach ($pay_arr as $row) {
+
 						if ($row["id"] <= $_GET['pid'] || $_GET['pid'] == 0) {
 							$ptotal += $row['amount'];
 					?>
 							<tr>
-								<td><b><?php echo date("Y-m-d", strtotime($row['date_created'])) ?></b></td>
+								<td><b><?php echo $row['payment_date'] ?></b></td>
 								<td class='text-right'><b><?php echo number_format($row['amount']) ?></b></td>
 							</tr>
 					<?php

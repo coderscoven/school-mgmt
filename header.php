@@ -12,6 +12,8 @@
 <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
 <!-- .. bootstrap -->
 <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<!-- overlayScrollbars -->
+<link href="assets/vendor/overlayScrollbars/css/OverlayScrollbars.min.css" rel="stylesheet">
 <!-- .. animate -->
 <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
 <!-- .. remixicon -->
@@ -30,22 +32,30 @@
 <!-- .. bootstrap-icons -->
 <link href="assets/vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 <!-- .. datepicker -->
-<link href="assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+<!-- <link href="assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet"> -->
+<!-- Daterange picker -->
+<link rel="stylesheet" href="assets/vendor/daterangepicker/daterangepicker.css">
 <!-- .. datatables -->
 <link href="assets/vendor/dataTables/datatables.min.css" rel="stylesheet">
+<!-- .. datatable button styling -->
+<link href="assets/vendor/datatables-buttons/css/buttons.bootstrap4.css" rel="stylesheet">
 <!-- .. datetimepicker -->
 <link href="assets/css/jquery.datetimepicker.min.css" rel="stylesheet">
 <!-- .. main theme -->
 <link href="assets/css/style.css" rel="stylesheet">
+<!-- .. print theme -->
+<link href="assets/css/print.css" rel="stylesheet" media="print">
 <!-- .. jquery-te -->
 <link href="assets/css/jquery-te-1.4.0.css" rel="stylesheet">
+<!-- .. jquery ui -->
+<link href="assets/vendor/jquery-ui/jquery-ui.min.css" rel="stylesheet">
 
 <!-- // fullcalendar -->
-<link rel="stylesheet" href="assets/vendor/fullcalendar/main.min.css">
+<!-- <link rel="stylesheet" href="assets/vendor/fullcalendar/main.min.css"> -->
 <!-- <link rel="stylesheet" href="assets/vendor/fullcalendar-interaction/main.min.css"> -->
-<link rel="stylesheet" href="assets/vendor/fullcalendar-daygrid/main.min.css">
+<!-- <link rel="stylesheet" href="assets/vendor/fullcalendar-daygrid/main.min.css">
 <link rel="stylesheet" href="assets/vendor/fullcalendar-timegrid/main.min.css">
-<link rel="stylesheet" href="assets/vendor/fullcalendar-bootstrap/main.min.css">
+<link rel="stylesheet" href="assets/vendor/fullcalendar-bootstrap/main.min.css"> -->
 
 <link rel="shortcut icon" href="assets/img/icon-48x48.png" type="image/x-icon">
 <link rel="icon" href="assets/img/icon-48x48.png" type="image/x-icon">

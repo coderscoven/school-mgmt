@@ -11,8 +11,8 @@ if (isset($_GET['classnameid']) && isset($_GET['classinfoid'])) {
 ?>
 <div class="container-fluid">
     <form action="" role="form" id="manage-class">
-        <input type="text" name="classnameid" value="<?php echo isset($qry->classnameid) ? $qry->classnameid : '' ?>">
-        <input type="text" name="classinfoid" value="<?php echo isset($qry->classinfoid) ? $qry->classinfoid : '' ?>">
+        <input type="hidden" name="classnameid" value="<?php echo isset($qry->classnameid) ? $qry->classnameid : '' ?>">
+        <input type="hidden" name="classinfoid" value="<?php echo isset($qry->classinfoid) ? $qry->classinfoid : '' ?>">
         <div class="row">
             <div class="col-lg-12">
                 <div id="msg" class="form-group"></div>
