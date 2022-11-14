@@ -36,9 +36,9 @@
 							<strong>List of Students</strong>
 						</div>
 						<div class="col-2">
-							<a class="btn btn-primary btn-block btn-sm" href="javascript:void(0)" id="new_student">
+							<button type="button" class="btn btn-primary btn-block btn-sm" id="new_student" <?php echo $_SESSION['login_access_level'] == LV_2 ? "disabled" : ""; ?>>
 								<i class="fas fa-plus"></i> New
-							</a>
+							</button>
 						</div>
 					</div>
 				</div>

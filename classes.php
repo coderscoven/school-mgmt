@@ -39,7 +39,7 @@
 							<strong>List of Classes</strong>
 						</div>
 						<div class="col-2">
-							<button type="button" class="btn btn-primary btn-block btn-sm" href="javascript:void(0)" id="new_class">
+							<button type="button" class="btn btn-primary btn-block btn-sm" id="new_class" <?php echo $_SESSION['login_access_level'] == LV_2 ? "disabled" : ""; ?>>
 								<i class="fas fa-plus"></i> New Class
 							</button>
 						</div>

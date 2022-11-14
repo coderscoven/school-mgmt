@@ -47,7 +47,7 @@
 			<span class='icon-field'><i class="far fa-circle "></i></span>
 			Student Mgmt
 		</a>
-		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'requirements']); ?>" class="nav-item nav-requirements">
+		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'requirements']); ?>" class="nav-item nav-requirements <?php echo $_SESSION['login_access_level'] == LV_2 ? 'd-none' : '' ?>">
 			<span class='icon-field'><i class="far fa-circle "></i></span>
 			Requirements
 		</a>

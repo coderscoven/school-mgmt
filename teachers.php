@@ -36,7 +36,7 @@
                             <strong>List of Teachers</strong>
                         </div>
                         <div class="col-2">
-                            <button type="button" class="btn btn-primary btn-block btn-sm" id="new_teacher">
+                            <button type="button" class="btn btn-primary btn-block btn-sm" id="new_teacher" <?php echo $_SESSION['login_access_level'] == LV_2 ? "disabled" : ""; ?>>
                                 <i class="fas fa-plus"></i> New
                             </button>
                         </div>

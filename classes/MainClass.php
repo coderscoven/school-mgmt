@@ -506,6 +506,11 @@ class MainClass extends DBConnect
 	{
 
 		$student = $this->db->query("SELECT s.id, s.photo, s.school_section, s.name, s.id_no, s.dob, s.gender, s.email, h.house_name, c.class_name FROM student s join houses h on s.house_id = h.id join class_streams c on s.class_id = c.id order by s.name asc ");
+
+		//
+		$isbursar = $_SESSION['login_access_level'] == LV_2 ? 'disabled' : '';
+
+		//
 		while ($row = $student->fetch_assoc()) :
 ?>
 			<tr>
@@ -528,9 +533,8 @@ class MainClass extends DBConnect
 				</td>
 				<td class="text-center">
 					<div class="btn-group btn-group-sm" role="group" aria-label="action buttons">
-						<button class="btn btn-outline-primary edit_student" type="button" data-id="<?php echo $row['id'] ?>">Edit</button>
-						<button class="btn btn-outline-info print_student d-none" type="button" data-id="<?php echo $row['id'] ?>">Print</button>
-						<button class="btn btn-outline-danger delete_student" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
+						<button class="btn btn-outline-primary edit_student" type="button" data-id="<?php echo $row['id'] ?>" <?php echo $isbursar; ?>>Edit</button>
+						<button class="btn btn-outline-danger delete_student" type="button" data-id="<?php echo $row['id'] ?>" <?php echo $isbursar; ?>>Delete</button>
 					</div>
 				</td>
 			</tr>
@@ -1987,6 +1991,9 @@ class MainClass extends DBConnect
 	{
 		$stmt = $this->db->query("SELECT * FROM teachers order by teacher_names asc");
 
+		//
+		$isbursar = $_SESSION['login_access_level'] == LV_2 ? 'disabled' : '';
+		//
 		foreach ($this->fetch_teachers() as $key => $row) {
 			?>
 			<tr>
@@ -2010,8 +2017,11 @@ class MainClass extends DBConnect
 					<p class="small">Education: <i><b><?php echo $row['teacher_education'] ?></i></p>
 				</td>
 				<td class="text-center">
-					<button class="btn btn-sm btn-outline-primary edit_teacher" type="button" data-id="<?php echo $row['id'] ?>">Edit</button>
-					<button class="btn btn-sm btn-outline-danger delete_teacher" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
+
+					<div class="btn-group btn-group-sm" role="group" aria-label="action buttons">
+						<button class="btn btn-outline-primary edit_teacher" type="button" data-id="<?php echo $row['id'] ?>" <?php echo $isbursar; ?>>Edit</button>
+						<button class="btn btn-outline-danger delete_teacher" type="button" data-id="<?php echo $row['id'] ?>" <?php echo $isbursar; ?>>Delete</button>
+					</div>
 				</td>
 			</tr>
 		<?php }
@@ -2464,6 +2474,8 @@ class MainClass extends DBConnect
 
 	/**
 	 * classes
+	 * 
+	 * @return void
 	 */
 	function fetchClasses()
 	{
@@ -2477,6 +2489,10 @@ class MainClass extends DBConnect
 		// get fees
 		$sql_f = $this->pdo->prepare("SELECT school_section, amount from fees where id = ?");
 
+		//
+		$isbursar = $_SESSION['login_access_level'] == LV_2 ? 'disabled' : '';
+
+		//
 		foreach ($results as $row) {
 
 			$teacherid = $row['teacher_id'];
@@ -2504,8 +2520,10 @@ class MainClass extends DBConnect
 					<p><b><?php echo $fees->school_section . ' | ' . number_format($fees->amount, 2) ?></b></p>
 				</td>
 				<td class="text-center">
-					<button class="btn btn-sm btn-outline-primary edit_class" type="button" data-classinfo="<?php echo $row['classinfoid'] ?>" data-id="<?php echo $row['classnameid'] ?>">Edit</button>
-					<button class="btn btn-sm btn-outline-danger delete_class" type="button" data-classinfo="<?php echo $row['classinfoid'] ?>" data-id="<?php echo $row['classnameid'] ?>">Delete</button>
+					<div class="btn-group btn-group-sm" role="group" aria-label="action buttons">
+						<button class="btn btn-outline-primary edit_class" type="button" data-classinfo="<?php echo $row['classinfoid'] ?>" data-id="<?php echo $row['classnameid'] ?>" <?php echo $isbursar; ?>>Edit</button>
+						<button class="btn btn-outline-danger delete_class" type="button" data-classinfo="<?php echo $row['classinfoid'] ?>" data-id="<?php echo $row['classnameid'] ?>" <?php echo $isbursar; ?>>Delete</button>
+					</div>
 				</td>
 			</tr>
 		<?php }
