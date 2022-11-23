@@ -2508,13 +2508,40 @@ class MainClass extends DBConnect
 	 */
 	function delete_class()
 	{
-		extract($_POST);
-		$delete = $this->db->query("DELETE FROM courses where id = " . $id);
-		$delete2 = $this->db->query("DELETE FROM fees where course_id = " . $id);
-		if ($delete && $delete2) {
-			return 1;
+
+		$response = "";
+
+		try {
+
+			extract($_POST);
+
+			//
+			$check = $this->pdo->prepare("SELECT count(*) as numclass FROM payments WHERE class_id = :id");
+			$check->execute(["id" => $id]);
+			$result = $check->fetchObject();
+			if ($result->numclass <= 0) {
+				$delete1 = $this->pdo->prepare("DELETE FROM class_streams where id = :id")->execute(["id" => $id]);
+				$delete2 = $this->pdo->prepare("DELETE FROM class_details where class_id = :id")->execute(["id" => $id]);
+				//
+				if ($delete1 && $delete2) {
+					$response = $this->json_response(200, "Class successfully deleted!", true);
+				} else {
+					$response = $this->json_response(422, "Error deleting class. Please try again!");
+				}
+			} else {
+				//
+				$response = $this->json_response(422, "Class is in use; hence can not be deleted!");
+			}
+		} catch (Exception $e) {
+			//
+			$this->logToFile($e->getMessage());
+			//
+			$this->error_logs($e);
+			//
+			$response = $this->json_response(500, "Internal server error. Please try again later!");
 		}
-	}
+		return $response;
+	} // end
 
 
 	/**

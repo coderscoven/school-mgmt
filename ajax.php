@@ -58,15 +58,14 @@ if ($action == "save_settings") {
 //	classes
 // ------------------------------------
 
+// add / edit class
 if ($action == "save_class") {
-	$save = $crud->save_class();
-	if ($save)
-		echo $save;
+	echo $crud->save_class();
 }
+
+// delete class
 if ($action == "delete_class") {
-	$delete = $crud->delete_class();
-	if ($delete)
-		echo $delete;
+	echo $crud->delete_class();
 }
 
 
