@@ -1,4 +1,7 @@
 <?php
+if ($_SESSION['login_access_level'] == LV_3) {
+    header('Location: index.php?page=home');
+}
 //
 $teachers = $crud->fetch_teachers();
 ?>

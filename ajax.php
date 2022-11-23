@@ -28,6 +28,11 @@ if ($action == 'logout2') {
 if ($action == 'save_user') {
 	echo $crud->save_user();
 }
+
+if ($action == 'manage_user_credentials') {
+	echo $crud->manage_user_credentials();
+}
+
 if ($action == 'delete_user') {
 	$save = $crud->delete_user();
 	if ($save)
@@ -276,6 +281,10 @@ if ($action == "teacher_info_report") {
 	echo $crud->teacher_info_report();
 }
 
+// roll call report 
+if ($action == "student_roll_call_report") {
+	echo $crud->student_roll_call_report();
+}
 
 // ------------------------------------
 //	charts

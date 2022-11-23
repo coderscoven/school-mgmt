@@ -7,32 +7,34 @@ if (isset($_GET['id'])) {
 		$$k = $v;
 	}
 }
-$student = $crud->select_students();
+$student = $crud->select_students_for_enrollment();
 // active school term
 $schoolterm = $crud->school_term_breadcrumb();
 $efnumber = $crud->gen_enrollement_ref_number();
+
 ?>
 <div class="container-fluid">
 	<form role="form" id="manage-fees">
 		<div id="msg"></div>
 		<input type="hidden" name="id" value="<?php echo isset($id) ? $id : '' ?>">
 		<input type="hidden" name="schtermid" value="<?php echo isset($school_term) ? $school_term : $schoolterm['id'] ?>">
+
 		<input type="hidden" class="form-control" id="ef_no" name="ef_no" value="<?php echo isset($ef_no) ? $ef_no : $efnumber ?>" required>
 
 		<div class="form-group">
 			<label for="school_term" class="control-label">School term.</label>
-			<input type="text" class="form-control" id="school_term" name="school_term" value="<?php echo 'Term ' . $schoolterm['term'] . ' | ' . $schoolterm['year']; ?>" readonly>
+			<input type="text" class="form-control" id="school_term" name="school_term" value="<?php echo isset($id) ? 'Term ' . $tterm . ' | ' . $tyear : 'Term ' . $schoolterm['term'] . ' | ' . $schoolterm['year']; ?>" readonly>
 		</div>
 
 		<div class="form-group">
 			<label for="student_id" class="control-label">Student</label>
 			<select name="stud_id" id="student_id" class="form-control select2" data-placeholder="--- select student ---">
 				<option value=""></option>
-				<?php while ($row = $student->fetch_assoc()) : ?>
+				<?php foreach ($student as $row) : ?>
 					<option value="<?php echo $row['id'] ?>" <?php echo isset($stud_id) && $stud_id == $row['id'] ? 'selected' : '' ?>>
 						<?php echo ucwords($row['name']) . ' | ' . $row['id_no'] ?>
 					</option>
-				<?php endwhile; ?>
+				<?php endforeach ?>
 			</select>
 		</div>
 		<?php if (isset($stud_id)) : ?>

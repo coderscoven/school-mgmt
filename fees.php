@@ -56,6 +56,7 @@
 						<thead class="bg-secondary text-light">
 							<tr>
 								<th scope="col">#</th>
+								<th scope="col">Term</th>
 								<th scope="col">Class</th>
 								<th scope="col">ID No.</th>
 								<th scope="col">Name</th>

@@ -714,7 +714,7 @@ class MainClass extends DBConnect
 
 
 	/**
-	 * select students
+	 * select students;
 	 *
 	 * @return mixed
 	 */
@@ -728,6 +728,45 @@ class MainClass extends DBConnect
 			return $stmt;
 		}
 	}
+
+
+	/**
+	 * select students; if a student has already been enrolled; do not show
+	 *
+	 * @return mixed
+	 */
+	function select_students_for_enrollment()
+	{
+
+
+		// current school term
+		$term_sql = $this->pdo->prepare("SELECT id FROM sch_terms WHERE sch_sts = :sts");
+		$term_sql->execute(["sts" => yes]);
+		$term = $term_sql->fetchObject();
+		$termid = $term->id;
+
+		//
+		$students = array();
+
+		//
+		$stmt = $this->pdo->prepare("SELECT id, name, id_no from student order by name asc");
+		$stmt->execute();
+		$results = $stmt->fetchAll();
+
+		$stmt_qry2 = $this->pdo->prepare("SELECT school_term FROM track_fee_payments WHERE stud_id = :id and school_term = :termid");
+
+		foreach ($results as $result) {
+
+			$stmt_qry2->execute(["id" => $result['id'], "termid" => $termid]);
+			$stmt_qry = $stmt_qry2->fetchObject();
+
+			if (!$stmt_qry) {
+				$students[] = $result;
+			}
+		}
+
+		return $students;
+	} // end
 
 
 	/**
@@ -924,7 +963,7 @@ class MainClass extends DBConnect
 	 */
 	function get_sel_student_ef_list($studid)
 	{
-		return $this->db->query("SELECT * FROM track_fee_payments where id = {$studid} ");
+		return $this->db->query("SELECT a.*, b.sch_term as tterm, b.sch_year as tyear FROM track_fee_payments a join sch_terms b on a.school_term = b.id where a.id = {$studid} ");
 	} // end
 
 
@@ -1203,15 +1242,22 @@ class MainClass extends DBConnect
 	function fees()
 	{
 		$i = 1;
-		$fees = $this->pdo->prepare("SELECT cs.class_name, ef.id as efid, ef.ef_no, ef.total_fee, s.id as studid, s.name as sname, s.id_no FROM 
+		$fees = $this->pdo->prepare("SELECT cs.class_name, ef.school_term, ef.id as efid, ef.ef_no, ef.total_fee, s.id as studid, s.name as sname, s.id_no FROM 
 		track_fee_payments ef inner join student s on s.id = ef.stud_id inner join class_streams cs on s.class_id = cs.id order by s.name asc ");
 		$fees->execute();
 		$results = $fees->fetchAll();
 
 		if ($results) :
 
+
+			$term_sql = $this->pdo->prepare("SELECT sch_term, sch_year FROM sch_terms WHERE id = :id");
+
 			foreach ($results as $row) :
 
+				$term_sql->execute(["id" => $row['school_term']]);
+				$term = $term_sql->fetchObject();
+
+				$efterm    = $term->sch_year . '|' . $term->sch_term;
 				$efid      = $row['efid'];
 				$efno      = $row['ef_no'];
 				$total_fee = $row['total_fee'];
@@ -1230,6 +1276,9 @@ class MainClass extends DBConnect
 			?>
 				<tr>
 					<th scope="row"><?php echo $i++ ?></th>
+					<td>
+						<p><?php echo $efterm ?></p>
+					</td>
 					<td>
 						<p><?php echo $classnm ?></p>
 					</td>
@@ -1403,7 +1452,15 @@ class MainClass extends DBConnect
 	 */
 	function payment_receipt($ef_id)
 	{
-		return $this->db->query("SELECT ef.*, s.name as sname, s.id_no, c.class_name, d.fees_id FROM track_fee_payments ef inner join student s on s.id = ef.stud_id inner join class_streams c on c.id = s.class_id inner join class_details d on c.id=d.class_id where ef.id = {$ef_id}");
+		return $this->db->query("SELECT ef.*, s.name as sname, s.id_no, c.class_name, d.fees_id, t.sch_term, t.sch_year FROM track_fee_payments ef 
+		inner join 
+		sch_terms t on ef.school_term = t.id 
+		inner join
+		student s on s.id = ef.stud_id 
+		inner join 
+		class_streams c on c.id = s.class_id 
+		inner join 
+		class_details d on c.id = d.class_id where ef.id = {$ef_id}");
 	} // end
 
 
@@ -1551,10 +1608,13 @@ class MainClass extends DBConnect
 
 		// fees payment
 		// SELECT SUM(t.total_fee) as expected_amount, s.sch_year, s.sch_term FROM `track_fee_payments` t join sch_terms s on t.school_term = s.id group by t.school_term; 
-		$feess = $this->pdo->prepare("SELECT SUM(t.total_fee) as expected_amount, SUM(p.amount) as amount_paid, s.sch_year, s.sch_term FROM `track_fee_payments` t join sch_terms s on t.school_term = s.id join payments p ON p.ef_id = t.id where s.sch_sts = :stts group by t.school_term");
+		$feess = $this->pdo->prepare("SELECT SUM(t.total_fee) as expected_amount, SUM(p.amount) as amount_paid, s.sch_year, s.sch_term FROM track_fee_payments t join sch_terms s on t.school_term = s.id join payments p ON p.ef_id = t.id where s.sch_sts = :stts group by t.school_term");
 		$feess->execute(["stts" => yes]);
 		$fee = $feess->fetchObject();
-		$fees_paid_so_far = (($fee->expected_amount - $fee->amount_paid) / ($fee->expected_amount)) * 100;
+		$fees_paid_so_far = 0.0;
+		if ($fee) :
+			$fees_paid_so_far = (($fee->expected_amount - $fee->amount_paid) / ($fee->expected_amount)) * 100;
+		endif;
 
 		//
 		return array("numStudent" => $numStudent->numStudents, "numTeacher" => $numTeacher->numTeachers, "fees_paid_so_far" => round($fees_paid_so_far, 1));
@@ -2337,8 +2397,10 @@ class MainClass extends DBConnect
 					<p class="small"><b><?php echo rtrim($stud_names, ", ") ?></b></p>
 				</td>
 				<td class="text-center">
-					<button class="btn btn-sm btn-outline-primary edit_parent" type="button" data-id="<?php echo $row['parentid'] ?>">Edit</button>
-					<button class="btn btn-sm btn-outline-danger delete_parent" type="button" data-id="<?php echo $row['parentid'] ?>">Delete</button>
+					<div class="btn-group btn-group-sm" role="group" aria-label="action buttons">
+						<button class="btn btn-outline-primary edit_parent" type="button" data-id="<?php echo $row['parentid'] ?>">Edit</button>
+						<button class="btn btn-outline-danger delete_parent" type="button" data-id="<?php echo $row['parentid'] ?>">Delete</button>
+					</div>
 				</td>
 			</tr>
 		<?php endwhile;
@@ -3182,16 +3244,167 @@ class MainClass extends DBConnect
 	} // end
 
 
+	/**
+	 * all students payments report
+	 *
+	 * @param  mixed $student_sel
+	 * @param  mixed $filter_data
+	 * @return mixed
+	 */
+	private function all_students_payments_report($rpt_term, $rpt_date, $student_sel, $filter_data)
+	{
+
+		$view = '';
+		$view .= '<div class="table-responsive">';
+		$view .= '<table class="table table-sm table-hover w-100" id="report-list">';
+		$view .= '<thead class="bg-secondary text-light">';
+		$view .= '<tr>';
+		$view .= '<th scope="col">#</th>';
+		$view .= '<th scope="col">Student names</th>';
+		$view .= '<th scope="col">ID No.</th>';
+		$view .= '<th scope="col">Amount to pay</th>';
+		$view .= '<th scope="col">Paid Amount</th>';
+		$view .= '<th scope="col">Balance</th>';
+		$view .= '</tr>';
+		$view .= '</thead>';
+
+		// filter_data
+		$a = 0;
+		$b = 0;
+		$c = 0;
+		$d = 0;
+		$e = 0;
+
+
+		$i = 1;
+		$total = 0;
+		$query = "SELECT SUM(p.amount) as amount_paid, p.payment_date, s.name as sname, ef.school_term, ef.ef_no, p.slip_serial, s.id_no, ef.total_fee, st.sch_term, st.sch_year FROM payments p 
+		inner join track_fee_payments ef on ef.id = p.ef_id 
+		inner join student s on s.id = ef.stud_id 
+		inner join sch_terms st  on st.id = ef.school_term 
+		where (1=1";
+
+		// current school term
+		$term_string = "";
+		if (!empty($rpt_term)) {
+			$sch_terms = $this->pdo->prepare("SELECT sch_term, sch_year FROM sch_terms WHERE id = :id");
+			$sch_terms->execute(['id' => $rpt_term]);
+			$sch_term = $sch_terms->fetchObject();
+
+			$term_string = "TERM " . $sch_term->sch_term . "- YEAR " . $sch_term->sch_year;
+		} else {
+			$term_string = "ALL TERMS";
+		}
+
+
+		//
+		foreach ($filter_data as $k => $v) :
+
+			// all students
+
+			// student selected
+			if ($v['type'] == 'dt_student') :
+				++$a;
+				$value = $v['value'];
+			endif;
+
+			// school term selected
+			if ($v['type'] == 'dt_school_term') :
+				++$b;
+				$value = $v['value'];
+				if ($value != "") {
+					if ($b > 1) {
+						$query .= " OR ef.school_term ='" . $value . "'";
+					} else {
+						$query .= " ) AND (ef.school_term ='" . $value . "'";
+					}
+				}
+			//  else {
+			// 	if ($b > 1) {
+			// 		$query .= " OR ef.school_term ='" . $sch_term->id . "'";
+			// 	} else {
+			// 		$query .= " ) AND (ef.school_term ='" . $sch_term->id . "'";
+			// 	}
+			// }
+			endif;
+
+			// date range
+
+			// school term selected
+			if ($v['type'] == 'dt_date_range') :
+				++$c;
+				$value = $v['value'];
+				if ($value != "") {
+					if ($c > 1) {
+						$query .= " OR p.payment_date ='" . $value . "'";
+					} else {
+						$query .= " ) AND (p.payment_date ='" . $value . "'";
+					}
+				}
+			endif;
+		endforeach;
+
+		//
+		$query .= " )";
+		$query .= " group by ef.stud_id order by unix_timestamp(p.payment_date) asc";
+		$stmt = $this->db->prepare($query);
+		$stmt->execute();
+		$payments = $stmt->get_result();
+
+		$messagetop = "";
+
+		if ($payments) {
+
+			$view .= '<tbody>';
+
+			while ($row = $payments->fetch_assoc()) :
+
+				// $total += $row['amount'];
+
+
+				$messagetop = $student_sel == 'all' ? "ALL STUDENTS" : "STUDENT: " . strtoupper($row['sname']);
+
+				$view .= '<tr>';
+				$view .= '<th scope="row">' . $i++ . '</th>';
+				$view .= '<td>' . ucwords($row['sname']) . '</td>';
+				$view .= '<td>' . $row['id_no'] . '</td>';
+				$view .= '<td>' . number_format($row['total_fee'], 2) . '</td>';
+				$view .= '<td>' . number_format($row['amount_paid'], 2) . '</td>';
+				$view .= '<td>' . number_format(($row['total_fee'] - $row['amount_paid']), 2) . '</td>';
+				// $view .= '<td>' . (new DateTime($row['payment_date']))->format("M d, Y") . '</td>';
+				// $view .= '<td>' . $row['sch_term'] . '</td>';
+				// $view .= '<td>' . $row['sch_year'] . '</td>';
+				// $view .= '<td>' . $row['slip_serial'] . '</td>';
+				$view .= '</tr>';
+
+			endwhile;
+		} else {
+
+			$view .= '<tr>';
+			$view .= '<th class="text-center" colspan="5">No Data.</th>';
+			$view .= '</tr>';
+		}
+
+		$view .= '</tbody>';
+		//
+
+		$view .= '</table>';
+		$view .= '</div>';
+
+		return json_encode(array("view" => $view, "title" => "PAYMENT REPORT", "messagetop" => $messagetop . ', ' . $term_string));
+	}
+
 
 
 	/**
-	 * payments report
+	 * selected students payments report
 	 *
-	 * @return void
+	 * @param  mixed $student_sel
+	 * @param  mixed $filter_data
+	 * @return mixed
 	 */
-	function payments_report()
+	private function sel_students_payments_report($rpt_term, $rpt_date, $student_sel, $filter_data)
 	{
-		extract($_POST);
 
 		$view = '';
 		$view .= '<div class="table-responsive">';
@@ -3200,11 +3413,10 @@ class MainClass extends DBConnect
 		$view .= '<tr>';
 		$view .= '<th scope="col">#</th>';
 		$view .= '<th scope="col">Payment Date</th>';
-		$view .= '<th scope="col">Term</th>';
-		$view .= '<th scope="col">Year</th>';
+		// $view .= '<th scope="col">Term</th>';
+		// $view .= '<th scope="col">Year</th>';
 		$view .= '<th scope="col">Serial No.</th>';
-		$view .= '<th scope="col">ID No.</th>';
-		$view .= '<th scope="col">Name</th>';
+		// $view .= '<th scope="col">ID No.</th>';
 		$view .= '<th scope="col">Paid Amount</th>';
 		// $view .= '<th scope="col">Balance</th>';
 		$view .= '</tr>';
@@ -3216,32 +3428,26 @@ class MainClass extends DBConnect
 		$c = 0;
 		$d = 0;
 		$e = 0;
-		//
-		// $studid = $rprt_student;
-		// $rprt_school_term = $rprt_school_term;
-		// $rprt_payment_date = $rprt_payment_date;
-		// $rp_start_date = $rp_start_date;
-		// $rp_end_date = $rp_end_date;
+
 
 		$i = 1;
 		$total = 0;
-		$query = "SELECT p.*, s.name as sname, ef.school_term, ef.ef_no, p.slip_serial, s.id_no, ef.total_fee, st.sch_term, st.sch_year FROM payments p inner join track_fee_payments ef on ef.id = p.ef_id inner join student s on s.id = ef.stud_id inner join sch_terms st  on st.id = ef.school_term where (1=1"; // date_format(p.payment_date,'%Y-%m') = ? order by unix_timestamp(p.payment_date) asc 
+		$query = "SELECT p.*, s.name as sname, ef.school_term, ef.ef_no, p.slip_serial, s.id_no, ef.total_fee, st.sch_term, st.sch_year FROM payments p inner join track_fee_payments ef on ef.id = p.ef_id inner join student s on s.id = ef.stud_id inner join sch_terms st on st.id = ef.school_term and s.id = '" . $student_sel . "' where (1=1";
+
+		// current school term
+		$term_string = "";
+		if (!empty($rpt_term)) {
+			$sch_terms = $this->pdo->prepare("SELECT sch_term, sch_year FROM sch_terms WHERE id = :id");
+			$sch_terms->execute(['id' => $rpt_term]);
+			$sch_term = $sch_terms->fetchObject();
+
+			$term_string = "TERM " . $sch_term->sch_term . "- YEAR " . $sch_term->sch_year;
+		} else {
+			$term_string = "ALL TERMS";
+		}
 
 		//
 		foreach ($filter_data as $k => $v) :
-
-			// student selected
-			if ($v['type'] == 'dt_student') :
-				++$a;
-				$value = $v['value'];
-				if ($value != "") {
-					if ($a > 1) {
-						$query .= " OR p.stud_id ='" . $value . "'";
-					} else {
-						$query .= " ) AND (p.stud_id ='" . $value . "'";
-					}
-				}
-			endif;
 
 			// school term selected
 			if ($v['type'] == 'dt_school_term') :
@@ -3279,6 +3485,9 @@ class MainClass extends DBConnect
 		$stmt->execute();
 		$payments = $stmt->get_result();
 
+		$messagetop = "";
+
+
 		if ($payments) {
 
 			$view .= '<tbody>';
@@ -3287,14 +3496,13 @@ class MainClass extends DBConnect
 
 				$total += $row['amount'];
 
+				$messagetop = "STUDENT: " . strtoupper($row['sname']);
+
 				$view .= '<tr>';
 				$view .= '<th scope="row">' . $i++ . '</th>';
 				$view .= '<td>' . (new DateTime($row['payment_date']))->format("M d, Y") . '</td>';
-				$view .= '<td>' . $row['sch_term'] . '</td>';
-				$view .= '<td>' . $row['sch_year'] . '</td>';
 				$view .= '<td>' . $row['slip_serial'] . '</td>';
-				$view .= '<td>' . $row['id_no'] . '</td>';
-				$view .= '<td>' . ucwords($row['sname']) . '</td>';
+				// $view .= '<td>' . $row['id_no'] . '</td>';
 				$view .= '<td>' . number_format($row['amount'], 2) . '</td>';
 				$view .= '</tr>';
 
@@ -3302,14 +3510,15 @@ class MainClass extends DBConnect
 		} else {
 
 			$view .= '<tr>';
-			$view .= '<th class="text-center" colspan="8">No Data.</th>';
+			$view .= '<th class="text-center" colspan="3">No Data.</th>';
 			$view .= '</tr>';
 		}
 
 		$view .= '</tbody>';
 		$view .= '<tfoot>';
 		$view .= '<tr>';
-		$view .= '<th colspan="7" class="text-right">Total</th>';
+		$view .= '<th colspan="3" class="text-right">Total</th>';
+
 		$view .= '<th scope="row">' . number_format($total, 2) . '</th>';
 		$view .= '</tr>';
 		$view .= '</tfoot>';
@@ -3319,7 +3528,24 @@ class MainClass extends DBConnect
 		$view .= '</table>';
 		$view .= '</div>';
 
-		return json_encode(array("view" => $view, "title" => "STUDENT PAYMENT REPORT", "messagetop" => ""));
+		return json_encode(array("view" => $view, "title" => "PAYMENT REPORT", "messagetop" => $messagetop . ', ' . $term_string));
+	}
+
+
+	/**
+	 * payments report
+	 *
+	 * @return void
+	 */
+	function payments_report()
+	{
+		extract($_POST);
+
+		if ($student_sel == 'all') {
+			return $this->all_students_payments_report($rpt_term, $rpt_date, $student_sel, $filter_data);
+		} else {
+			return $this->sel_students_payments_report($rpt_term, $rpt_date, $student_sel, $filter_data);
+		}
 	} //
 
 
@@ -3925,6 +4151,224 @@ class MainClass extends DBConnect
 		return $response;
 	} // end
 
+
+
+	/**
+	 * fetch teachers and bursars
+	 */
+	function fetch_teachers_bursars($table = LV_3)
+	{
+		if ($table == LV_3) {
+			$stmt = $this->pdo->prepare("SELECT id, teacher_names from teachers order by teacher_names asc");
+			$stmt->execute();
+			return $stmt->fetchAll();
+		}
+	} // end
+
+
+
+
+
+
+	/**
+	 * student roll call report
+	 *
+	 * @return mixed
+	 */
+	function student_roll_call_report()
+	{
+
+		$response = "";
+
+		try {
+			extract($_POST);
+
+			if (empty($roll_call_class)) {
+				//
+				$response = $this->json_response(422, "<div class='alert alert-danger' role='alert'><p class='my-1'>Please select class!</p></div>", false);
+			} elseif (empty($roll_call_date)) {
+				//
+				$response = $this->json_response(422, "<div class='alert alert-danger' role='alert'><p class='my-1'>Please select date!</p></div>", false);
+			} else {
+
+				//
+				$stmt = $this->pdo->prepare("SELECT * FROM roll_call where class_id = :id and roll_call_date = :rc_date");
+				$stmt->execute(["id" => $roll_call_class, "rc_date" => $roll_call_date]);
+				$result = $stmt->fetchAll();
+
+				if ($result) {
+
+					$cnt = 1;
+
+					//
+					$stmt2 = $this->pdo->prepare("SELECT a.class_name, b.*, c.teacher_names FROM class_streams a 
+					join class_details b on b.class_id = a.id join 
+					teachers c on b.teacher_id = c.id 
+					where a.id = :id");
+					$stmt2->execute(["id" => $roll_call_class]);
+					$result2 = $stmt2->fetchObject();
+
+					$view = '<div id="teacher_info_rprt_cnt">';
+					$view .= '<div id="tch_rprt_header" class="text-center mb-5">';
+					$view .= '<h5 class="font-weight-bold">CLASS ATTENDANCE REPORT</h5>';
+					$view .= '</div>';
+
+					$view .= '<div id="tch_rprt_cnt" class="mb-3 text-center">';
+
+					$view .= '<h6 class="font-weight-bold mb-3">CLASS DETAILS</h6>';
+					$view .= '<table class="w-100 table mb-4 border-0">';
+					$view .= '<tr>';
+					$view .= '<th>DATE: </th><td>' . (new DateTime($roll_call_date))->format('d M, Y') . '</td>';
+					$view .= '<th>CLASS: </th><td>' . $result2->class_name . '</td>';
+					$view .= '<th>TEACHER: </th><td>' . $result2->teacher_names . '</td>';
+					$view .= '</tr>';
+					$view .= '</table>';
+
+					$view .= '<h6 class="font-weight-bold mb-3">ATTENDANCE DETAILS</h6>';
+					$view .= '<table class="w-100 table table-bordered mb-4">';
+
+					$view .= '<thead class="bg-secondary text-light">';
+					$view .= '<tr>';
+					$view .= '<th scope="col">#</th>';
+					$view .= '<th scope="col">STUDENT NAMES</th>';
+					$view .= '<th scope="col">STUDENT STATUS</th>';
+					$view .= '</tr>';
+					$view .= '</thead>';
+
+
+					$view .= '<tbody>';
+					foreach ($result as $row) {
+						$view .= '<tr>';
+						$view .= '<th scope="row">' . $cnt++ . '</th>';
+						$view .= '<td>' . $row["student_names"] . '</td>';
+						$view .= '<td>' . $row["stud_status"] . '</td>';
+						$view .= '</tr>';
+					}
+					$view .= '</tbody>';
+					$view .= '</table>';
+
+
+
+					$view .= '</div>';
+					$view .= '</div>';
+
+					//
+					$response = $this->json_response(200, $view, true);
+				} else {
+
+					//
+					$response = $this->json_response(422, "<div class='alert alert-info' role='alert'><p class='my-1'>No results found. Please try again!</p></div>", false);
+				}
+			}
+		} catch (Exception $e) {
+			//
+			$this->error_logs($e->getMessage());
+			//
+			$this->logToFile($e->getMessage());
+			//
+			$response = $this->json_response(500, "<div class='alert alert-danger' role='alert'><p class='my-1'><p>Internal server error. Please try again later!</p></div>");
+		}
+		//
+		return $response;
+	} // end
+
+
+
+
+
+
+	/**
+	 * generate a random password
+	 *
+	 * @return mixed
+	 */
+	function genRandomPassword()
+	{
+
+		return $this->genRandomString(8);
+	} // end
+
+
+
+	/**
+	 * assign an existing user login credentials; useful for teachers, bursars
+	 *
+	 * @return mixed
+	 */
+	function manage_user_credentials()
+	{
+		$response = "";
+
+		try {
+
+			extract($_POST);
+
+			//
+			if (empty($assign_user_id)) {
+				$response = $this->json_response(422, "Please select user to assign credentials!");
+			} elseif (empty($assign_user_name)) {
+				$response = $this->json_response(422, "Please enter user name!");
+			} elseif (empty($assign_user_password)) {
+				$response = $this->json_response(422, "Please enter user password!");
+			} elseif (strlen($assign_user_password) < 8) {
+				$response = $this->json_response(422, "Password can not be less than 8 characters!");
+			} else {
+
+				//
+				$stmt = $this->pdo->prepare("SELECT * from users where username = :username");
+				$stmt->execute(["username" => $assign_user_name]);
+				$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+				if ($result) {
+					return $this->json_response(422, "Username entered already exists!");
+				} else {
+					//
+					$dt = $this->genDateTime();
+
+					$info_qry =  $this->pdo->prepare("SELECT teacher_names, teacher_email from teachers where id = :id");
+					$info_qry->execute(["id" => $assign_user_id]);
+					$info = $info_qry->fetchObject();
+					//
+					$name = $info->teacher_names;
+					$email = $info->teacher_email;
+
+					//
+					// hash password
+					$hashedPassword = password_hash($assign_user_password, PASSWORD_DEFAULT, array('cost' => HASH_COST_FACTOR));
+
+					//
+					$save = $this->pdo->prepare("INSERT INTO users (name, username, email_address, access_level, password, type, created_at, updated_at) 
+										values (:name, :username, :email_address, :access_level, :password, :type, :created_at, :updated_at)");
+					$check = $save->execute([
+						"name" => $name,
+						"username" => $assign_user_name,
+						"email_address" => $email,
+						"access_level" => LV_3,
+						"password" => $hashedPassword,
+						"type" => 3,
+						"created_at" => $dt,
+						"updated_at" => $dt,
+					]);
+
+					//
+					if ($check) :
+						return $this->json_response(200, "{$name} has successfully been assigned login credentials!", true);
+					else :
+						return $this->json_response(422, "Error submitting information. Please try again!");
+					endif;
+				}
+			}
+		} catch (Exception $e) {
+			//
+			$this->error_logs($e->getMessage());
+			//
+			$this->logToFile($e->getMessage());
+			//
+			$response = $this->json_response(500, "Internal server error. Please try again later!");
+		}
+		//
+		return $response;
+	}
 } // end of class
 
 // init class object to be used gloabally

@@ -1704,9 +1704,7 @@ nav#sidebar {
   width: 200px;
   font-size: 12px;
   top: 2.5em;
-  /* overflow-x: hidden;
-  overflow-y: scroll; */
-  height: 100vh;
+  /* height: 100vh; */
 }
 
 
@@ -1728,6 +1726,10 @@ a.nav-item:hover,
   background-color: #007bff;
   color: #fffafa;
   /*#000000ad*/
+}
+
+#sidebar .sidebar-list a.nav-item:last-child {
+  margin-bottom: 2rem;
 }
 
 main#view-panel {

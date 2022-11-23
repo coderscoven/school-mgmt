@@ -1,3 +1,9 @@
+<?php
+if ($_SESSION['login_access_level'] == LV_3) {
+    header('Location: index.php?page=home');
+}
+?>
+
 <style>
     input[type=checkbox] {
         /* Double-sized Checkboxes */
@@ -43,7 +49,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <table class="table table-sm datatableClass table-hover">
+                    <table class="table table-sm datatableClass table-hover table-striped">
                         <thead class="bg-secondary text-light">
                             <tr>
                                 <th scope="col">Photo</th>

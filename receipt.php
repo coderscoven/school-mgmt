@@ -57,6 +57,8 @@ while ($row = $payments->fetch_array()) {
 		<?php if ($_GET['pid'] > 0) : ?>
 
 			<div class="w-50">
+				<p>School term: <b><?php echo isset($pay_arr[$_GET['pid']]) ? $sch_year . '|' . $sch_term : '' ?></b></p>
+
 				<p>Payment Date: <b><?php echo isset($pay_arr[$_GET['pid']]) ? (new DateTime($pay_arr[$_GET['pid']]['payment_date']))->format("M d, Y") : '' ?></b></p>
 				<p>Paid Amount: <b><?php echo isset($pay_arr[$_GET['pid']]) ? number_format($pay_arr[$_GET['pid']]['amount'], 2) : '' ?></b></p>
 			</div>

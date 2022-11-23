@@ -12,7 +12,7 @@
 
 <nav id="sidebar" class='mx-lt-5 bg-dark d-print-none'>
 
-	<div class="sidebar-list">
+	<div id="sidebar-items" class="sidebar-list">
 		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'home']); ?>" class="nav-item nav-home">
 			<span class='icon-field'><i class="fas fa-dashboard "></i></span>
 			Dashboard
@@ -28,7 +28,7 @@
 
 		<div class="text-white font-weight-bold bg-black py-1 pl-4">TEACHER</div>
 
-		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'teachers']); ?>" class="nav-item nav-teachers">
+		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'teachers']); ?>" class="nav-item nav-teachers <?php echo $_SESSION['login_access_level'] == LV_3 ? 'd-none' : '' ?>">
 			<span class='icon-field'><i class="fas fa-chalkboard-teacher "></i></span>
 			Teacher Mgmt
 		</a>
@@ -85,9 +85,13 @@
 			<span class='icon-field'><i class="far fa-circle "></i></span>
 			Students
 		</a>
-		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'teacher_details_report']); ?>" class="nav-item nav-teacher_details_report">
+		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'teacher_details_report']); ?>" class="nav-item nav-teacher_details_report <?php echo $_SESSION['login_access_level'] == LV_3 ? 'd-none' : ''; ?>">
 			<span class='icon-field'><i class="far fa-circle "></i></span>
 			Teachers details
+		</a>
+		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'roll_call_report']); ?>" class="nav-item nav-roll_call_report">
+			<span class='icon-field'><i class="far fa-circle "></i></span>
+			Roll call
 		</a>
 
 		<!-- ============================================ -->
@@ -101,7 +105,7 @@
 		<?php endif; ?>
 
 
-		<a href="<?php echo 'index.php?' . http_build_query(['page' => 'logout']); ?>" class="nav-item">
+		<a href="<?php echo 'ajax.php?' . http_build_query(['action' => 'logout']); ?>" class="nav-item">
 			<span class='icon-field'><i class="fas fa-sign-out"></i></span>
 			Logout
 		</a>

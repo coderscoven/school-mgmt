@@ -145,6 +145,11 @@ $breadcrumb = $crud->school_term_breadcrumb();
                 $pagetitle = '<h1 class="text-uppercase"><i class="fas fa-th-list" role="img" aria-label="Reports"></i> Teacher details REPORT</h1>';
                 $pageText = "Teacher Details Reports";
                 break;
+              case "roll_call_report":
+                $pagetitle = '<h1 class="text-uppercase"><i class="fas fa-th-list" role="img" aria-label="Reports"></i> Roll call REPORT</h1>';
+                $pageText = "Roll call Reports";
+                break;
+
               case "users":
                 $pagetitle = '<h1><i class="fas fa-users" role="img" aria-label="Users"></i> USERS</h1>';
                 $pageText = "Users";

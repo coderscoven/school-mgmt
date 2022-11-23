@@ -4,11 +4,16 @@
 			<div class="card">
 				<div class="card-header">
 					<div class="row align-items-center">
-						<div class="col-10">
+						<div class="col-md-8 col-sm-12">
 							<strong>User List</strong>
 						</div>
-						<div class="col-2">
-							<button class="btn btn-primary btn-sm btn-block" id="new_user"><i class="fas fa-plus"></i> New user</button>
+						<div class="col-md-4 col-sm-12">
+							<div class="btn-group btn-group-sm" role="group" aria-label="action buttons">
+								<button class="btn btn-warning" id="new_user">
+									<i class="fas fa-plus"></i> Add new user</button>
+								<button class="btn btn-info" id="assign_user_credentials">
+									<i class="fas fa-plus"></i> Assign user credentials</button>
+							</div>
 						</div>
 					</div>
 				</div>

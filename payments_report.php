@@ -22,18 +22,23 @@ $terms = $crud->fetch_school_terms();
                                 <div class="form-group col-md-5">
                                     <label for="rprt_student">Student</label>
                                     <select name="rprt_student" id="rprt_student" class="form-control select2 rprt-payment-filter" data-placeholder="--- select student ---">
-                                        <option value="" data-type="dt_student"></option>
+                                        <option value="all" data-type="dt_student">All</option>
                                         <?php foreach ($students as $row) : ?>
                                             <option value="<?php echo $row['id'] ?>" data-type="dt_student"><?php echo $row['name'] ?></option>
                                         <?php endforeach ?>
                                     </select>
                                 </div>
+
+                                <input type="hidden" id="student_sel" name="student_sel">
+                                <input type="hidden" id="rpt_term" name="rpt_term">
+                                <input type="hidden" id="rpt_date" name="rpt_date">
+
                                 <div class="form-group col-md-3">
                                     <label for="rprt_school_term">School Term</label>
                                     <select name="rprt_school_term" id="rprt_school_term" class="form-control rprt-payment-filter">
                                         <option value="" data-type="dt_school_term">--- select ---</option>
                                         <?php foreach ($terms as $term) : ?>
-                                            <option value="<?php echo $term['id'] ?>" data-type="dt_school_term"><?php echo $term['sch_year'] . ' - ' . $term['sch_term'] ?></option>
+                                            <option value="<?php echo $term['id'] ?>" data-type="dt_school_term" <?php echo $term['sch_sts'] == yes ? 'selected' : '' ?>><?php echo $term['sch_year'] . ' - ' . $term['sch_term'] ?></option>
                                         <?php endforeach ?>
                                     </select>
                                 </div>
